@@ -9,7 +9,7 @@ about: Submit code changes for review
 
 Fixes # <!-- Issue number, e.g., Fixes #123 -->
 
----
+-------
 
 ## Type of Change
 
