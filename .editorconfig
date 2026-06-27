@@ -1,0 +1,61 @@
+# EditorConfig — Farm Kart Microservices
+# https://editorconfig.org
+# Enforces consistent coding style across all editors and IDEs.
+
+root = true
+
+# ── Default: all files ──────────────────────────────────────────
+[*]
+charset                  = utf-8
+end_of_line              = lf
+indent_style             = space
+indent_size              = 4
+insert_final_newline     = true
+trim_trailing_whitespace = true
+max_line_length          = 120
+
+# ── Java ─────────────────────────────────────────────────────────
+[*.java]
+indent_size              = 4
+continuation_indent_size = 8
+
+# ── XML (Maven POM, Spring Config, etc.) ─────────────────────────
+[*.xml]
+indent_size              = 4
+
+# ── YAML (application.yml, docker-compose.yml) ───────────────────
+[*.{yml,yaml}]
+indent_size              = 2
+
+# ── JSON ─────────────────────────────────────────────────────────
+[*.json]
+indent_size              = 2
+
+# ── Properties ───────────────────────────────────────────────────
+[*.properties]
+indent_size              = 4
+
+# ── Markdown ─────────────────────────────────────────────────────
+[*.md]
+trim_trailing_whitespace = false
+max_line_length          = off
+
+# ── Shell scripts ────────────────────────────────────────────────
+[*.sh]
+indent_size              = 2
+
+# ── TypeScript / JavaScript (farm-kart-mcp, farm-kart-ui) ────────
+[*.{ts,tsx,js,jsx}]
+indent_size              = 2
+
+# ── Dockerfiles ──────────────────────────────────────────────────
+[Dockerfile*]
+indent_size              = 4
+
+# ── GitHub Actions ───────────────────────────────────────────────
+[.github/**/*.{yml,yaml}]
+indent_size              = 2
+
+# ── Maven Wrapper ────────────────────────────────────────────────
+[*.mvn]
+indent_size              = 2

@@ -1,0 +1,34 @@
+{
+  "index_patterns": ["farmkart_crops*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "analysis": {
+        "analyzer": {
+          "crop_name_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": ["lowercase", "asciifolding"]
+          }
+        }
+      }
+    },
+    "mappings": {
+      "properties": {
+        "cropId": { "type": "long" },
+        "name": { "type": "text", "analyzer": "crop_name_analyzer", "fields": { "keyword": { "type": "keyword" } } },
+        "slug": { "type": "keyword" },
+        "categoryName": { "type": "keyword" },
+        "description": { "type": "text" },
+        "isOrganic": { "type": "boolean" },
+        "updatedAt": { "type": "date" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "FARM-017 initial crop catalog search index",
+    "jira": "FARM-017",
+    "version": "V1719506000__farmkart_crops"
+  }
+}

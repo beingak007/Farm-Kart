@@ -1,0 +1,161 @@
+# ============================================================
+# Farm Kart Microservices — .gitignore
+# Java 21 | Spring Boot 3.3 | Maven Multi-Module
+# ============================================================
+
+# -------------------------------------------------------
+# Maven Build Outputs
+# -------------------------------------------------------
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Maven Wrapper
+.mvn/timing.properties
+.mvn/jvm.config
+
+# -------------------------------------------------------
+# Java Compiled Files
+# -------------------------------------------------------
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# -------------------------------------------------------
+# Spring Boot / Runtime
+# -------------------------------------------------------
+*.pid
+*.pid.lock
+spring.log
+logs/
+*.log
+*.log.*
+
+# -------------------------------------------------------
+# IntelliJ IDEA
+# -------------------------------------------------------
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# -------------------------------------------------------
+# Eclipse
+# -------------------------------------------------------
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# -------------------------------------------------------
+# NetBeans
+# -------------------------------------------------------
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# -------------------------------------------------------
+# VS Code
+# -------------------------------------------------------
+.vscode/
+
+# -------------------------------------------------------
+# Operating System Files
+# -------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# -------------------------------------------------------
+# Secrets & Environment Variables — NEVER COMMIT THESE
+# -------------------------------------------------------
+.env
+.env.*
+*.env
+application-local.yml
+application-local.properties
+application-secret*.yml
+application-secret*.properties
+*-secrets.yml
+*-secrets.properties
+secrets/
+credentials/
+*.pem
+*.p12
+*.jks
+*.keystore
+*.truststore
+private-key*
+secret-key*
+
+# -------------------------------------------------------
+# Docker
+# -------------------------------------------------------
+.dockerignore
+
+# -------------------------------------------------------
+# Test & Coverage Reports
+# -------------------------------------------------------
+jacoco.exec
+coverage/
+
+# -------------------------------------------------------
+# SonarQube Cache
+# -------------------------------------------------------
+.sonar/
+.sonarwork/
+sonar-scanner*/
+
+# -------------------------------------------------------
+# Node.js (for farm-kart-ui / farm-kart-mcp)
+# -------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+dist/
+build/
+.next/
+.nuxt/
+*.tsbuildinfo
+
+# -------------------------------------------------------
+# Kotlin Compiler Output (if applicable)
+# -------------------------------------------------------
+*.kotlin_module
+
+# -------------------------------------------------------
+# Misc / Temp
+# -------------------------------------------------------
+*.swp
+*.swo
+*~
+.cache/
+tmp/
+temp/
+.temp/
+PDF/

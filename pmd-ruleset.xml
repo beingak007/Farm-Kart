@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<!--
+    Farm Kart Microservices — PMD Ruleset
+    Curated rules for Java 21 + Spring Boot 3 microservices.
+    https://pmd.github.io/latest/pmd_rules_java.html
+-->
+<ruleset name="FarmKart PMD Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+    <description>PMD ruleset for Farm Kart Microservices — Java 21 / Spring Boot 3</description>
+
+    <!-- ── Best Practices ── -->
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="GuardLogStatement"/>
+        <exclude name="JUnitTestContainsTooManyAsserts"/>
+        <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+        <exclude name="AvoidReassigningParameters"/>
+        <exclude name="UseVarargs"/>
+    </rule>
+
+    <!-- ── Code Style ── -->
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="AtLeastOneConstructor"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="CallSuperInConstructor"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="DefaultPackage"/>
+        <exclude name="LongVariable"/>
+        <exclude name="ShortVariable"/>
+        <exclude name="TooManyStaticImports"/>
+        <exclude name="FieldDeclarationsShouldBeAtStartOfClass"/>
+        <exclude name="UseUnderscoresInNumericLiterals"/>
+    </rule>
+
+    <!-- ── Design ── -->
+    <rule ref="category/java/design.xml">
+        <exclude name="LawOfDemeter"/>
+        <exclude name="LoosePackageCoupling"/>
+        <exclude name="DataClass"/>
+        <exclude name="UseObjectForClearerAPI"/>
+    </rule>
+
+    <!-- ── Error Prone ── -->
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="BeanMembersShouldSerialize"/>
+        <exclude name="DataflowAnomalyAnalysis"/>
+        <exclude name="NullAssignment"/>
+    </rule>
+
+    <!-- ── Performance ── -->
+    <rule ref="category/java/performance.xml">
+        <exclude name="AvoidInstantiatingObjectsJustToGetClass"/>
+    </rule>
+
+    <!-- ── Security ── -->
+    <rule ref="category/java/security.xml"/>
+
+    <!-- ── Custom exclusions for Spring patterns ── -->
+    <rule ref="category/java/design.xml/TooManyMethods">
+        <properties>
+            <property name="maxmethods" value="20"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/design.xml/ExcessiveClassLength">
+        <properties>
+            <property name="minimum" value="500"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/design.xml/ExcessiveMethodLength">
+        <properties>
+            <property name="minimum" value="60"/>
+        </properties>
+    </rule>
+
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="methodReportLevel" value="15"/>
+            <property name="classReportLevel" value="80"/>
+        </properties>
+    </rule>
+
+</ruleset>

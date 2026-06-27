@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.farmkart</groupId>
+        <artifactId>farm-kart-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>farm-kart-logistics</artifactId>
+    <packaging>pom</packaging>
+    <name>farm-kart-logistics</name>
+    <description>Logistics Service — shipment creation and delivery tracking</description>
+    <modules>
+        <module>farm-kart-logistics-client</module>
+        <module>farm-kart-logistics-repository</module>
+        <module>farm-kart-logistics-service</module>
+        <module>farm-kart-logistics-rest</module>
+    </modules>
+</project>

@@ -1,0 +1,144 @@
+# ============================================================
+# Farm Kart Microservices — Dependabot Configuration
+# Automatically creates PRs for dependency updates.
+# https://docs.github.com/en/code-security/dependabot
+# ============================================================
+
+version: 2
+
+updates:
+
+  # ── Maven (Java — all pom.xml files) ──────────────────────
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    target-branch: "develop"
+    labels:
+      - "dependencies"
+      - "java"
+      - "automated"
+    reviewers:
+      - "beingakstyle"
+    assignees:
+      - "beingakstyle"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      # Group all Spring Boot updates into a single PR
+      spring-boot:
+        patterns:
+          - "org.springframework.boot:*"
+          - "org.springframework:*"
+      # Group all AWS SDK updates
+      aws-sdk:
+        patterns:
+          - "software.amazon.awssdk:*"
+      # Group JWT library updates
+      jjwt:
+        patterns:
+          - "io.jsonwebtoken:*"
+      # Group testing libraries
+      testing:
+        patterns:
+          - "org.junit.jupiter:*"
+          - "org.mockito:*"
+          - "org.assertj:*"
+          - "org.testcontainers:*"
+      # Group Kafka
+      kafka:
+        patterns:
+          - "org.apache.kafka:*"
+          - "org.springframework.kafka:*"
+    ignore:
+      # Pin Spring Boot major version — upgrade manually
+      - dependency-name: "org.springframework.boot:spring-boot-starter-parent"
+        update-types: ["version-update:semver-major"]
+
+  # ── GitHub Actions ─────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    reviewers:
+      - "beingakstyle"
+    assignees:
+      - "beingakstyle"
+    commit-message:
+      prefix: "ci(actions)"
+      include: "scope"
+
+  # ── Node.js — farm-kart-ui ─────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/farm-kart-ui"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "08:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "automated"
+    reviewers:
+      - "beingakstyle"
+    assignees:
+      - "beingakstyle"
+    commit-message:
+      prefix: "chore(deps-ui)"
+
+  # ── Node.js — farm-kart-mcp ────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/farm-kart-mcp"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "08:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    target-branch: "develop"
+    labels:
+      - "dependencies"
+      - "mcp"
+      - "automated"
+    reviewers:
+      - "beingakstyle"
+    assignees:
+      - "beingakstyle"
+    commit-message:
+      prefix: "chore(deps-mcp)"
+
+  # ── Docker (docker-compose.yml) ────────────────────────────
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 3
+    target-branch: "develop"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "automated"
+    reviewers:
+      - "beingakstyle"
+    commit-message:
+      prefix: "chore(docker)"

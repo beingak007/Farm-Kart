@@ -1,0 +1,62 @@
+# Code Owners — Farm Kart Microservices
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Format: <pattern>  <owner>
+# Owners are notified when a pull request modifies code that matches a pattern.
+# Last matching rule takes precedence.
+
+# -------------------------------------------------------
+# Global default owner — covers everything not listed below
+# -------------------------------------------------------
+*                                   @beingakstyle
+
+# -------------------------------------------------------
+# Root configuration & CI
+# -------------------------------------------------------
+/.github/                           @beingakstyle
+/pom.xml                            @beingakstyle
+/.gitignore                         @beingakstyle
+/docker-compose.yml                 @beingakstyle
+
+# -------------------------------------------------------
+# Shared / Framework modules
+# -------------------------------------------------------
+/farm-kart-starter-common/          @beingakstyle
+/farm-kart-common-rest/             @beingakstyle
+/farm-kart-framework/               @beingakstyle
+
+# -------------------------------------------------------
+# Core Marketplace Service
+# -------------------------------------------------------
+/farm-kart/                         @beingakstyle
+
+# -------------------------------------------------------
+# Domain Microservices
+# -------------------------------------------------------
+/farm-kart-farmer/                  @beingakstyle
+/farm-kart-buyer/                   @beingakstyle
+/farm-kart-product-catalog/         @beingakstyle
+/farm-kart-logistics/               @beingakstyle
+/farm-kart-warehouse/               @beingakstyle
+/farm-kart-market-price/            @beingakstyle
+/farm-kart-notification/            @beingakstyle
+/farm-kart-admin/                   @beingakstyle
+/farm-kart-reporting/               @beingakstyle
+
+# -------------------------------------------------------
+# AI / Agent / Advisory
+# -------------------------------------------------------
+/farm-kart-ai-advisory/             @beingakstyle
+/farm-kart-agent/                   @beingakstyle
+/farm-kart-mcp/                     @beingakstyle
+
+# -------------------------------------------------------
+# Frontend
+# -------------------------------------------------------
+/farm-kart-ui/                      @beingakstyle
+
+# -------------------------------------------------------
+# Infrastructure
+# -------------------------------------------------------
+/docker/                            @beingakstyle
+/scripts/                           @beingakstyle

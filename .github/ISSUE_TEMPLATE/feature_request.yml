@@ -1,0 +1,88 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for Farm Kart
+title: "[FEATURE] "
+labels: ["enhancement", "triage"]
+assignees:
+  - beingakstyle
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please fill out the sections below.
+
+  - type: dropdown
+    id: target-service
+    attributes:
+      label: Target Microservice
+      description: Which service should this feature be added to?
+      options:
+        - farm-kart (Core Marketplace)
+        - farm-kart-farmer
+        - farm-kart-buyer
+        - farm-kart-product-catalog
+        - farm-kart-logistics
+        - farm-kart-warehouse
+        - farm-kart-market-price
+        - farm-kart-notification
+        - farm-kart-admin
+        - farm-kart-reporting
+        - farm-kart-ai-advisory
+        - farm-kart-agent (AI Agent)
+        - farm-kart-ui (Frontend)
+        - New service / Cross-cutting
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? Describe the business or technical need.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the feature you'd like to see. Include any API design, data model changes, or UX considerations.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative approaches? Why is your proposed solution preferred?
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Critical (Blocking production use)
+        - High (Significant business value)
+        - Medium (Nice to have)
+        - Low (Minor improvement)
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know this feature is complete?
+      placeholder: |
+        - [ ] Endpoint POST /api/v1/... accepts ...
+        - [ ] Response returns HTTP 201 with ...
+        - [ ] Unit tests cover ...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues and this is not a duplicate.
+          required: true
+        - label: I understand this requires maintainer approval before implementation begins.
+          required: true

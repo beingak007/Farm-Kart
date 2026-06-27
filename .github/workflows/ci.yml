@@ -1,0 +1,316 @@
+# ============================================================
+# Farm Kart Microservices — CI Pipeline
+# Triggers: push to main/develop, all pull requests
+# Java 21 | Maven | JaCoCo | SonarCloud | OWASP
+# ============================================================
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "release/**"
+      - "hotfix/**"
+  pull_request:
+    branches:
+      - main
+      - develop
+    types: [opened, synchronize, reopened]
+
+# Cancel in-progress runs for the same ref to save runner minutes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: "21"
+  JAVA_DISTRIBUTION: "temurin"
+  MAVEN_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
+
+jobs:
+  # ─────────────────────────────────────────────────────────
+  # Job 1: Build + Unit Tests + JaCoCo
+  # ─────────────────────────────────────────────────────────
+  build-and-test:
+    name: Build & Test (Java ${{ env.JAVA_VERSION }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Full history required by SonarCloud
+
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Display Java & Maven versions
+        run: |
+          java -version
+          mvn --version
+
+      - name: Build all modules (skip tests for compile check)
+        run: mvn clean package -DskipTests --batch-mode --no-transfer-progress
+
+      - name: Run unit tests with JaCoCo
+        run: mvn verify --batch-mode --no-transfer-progress -Djacoco.haltOnFailure=false
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Upload JaCoCo XML reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jacoco-reports
+          path: "**/target/site/jacoco/jacoco.xml"
+          retention-days: 14
+
+      - name: Upload JaCoCo HTML reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jacoco-html-reports
+          path: "**/target/site/jacoco/"
+          retention-days: 7
+
+      - name: Upload test results (Surefire)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: surefire-reports
+          path: "**/target/surefire-reports/"
+          retention-days: 7
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Maven Test Results
+          path: "**/target/surefire-reports/*.xml"
+          reporter: java-junit
+          fail-on-error: false
+
+  # ─────────────────────────────────────────────────────────
+  # Job 2: SonarCloud Analysis
+  # Runs AFTER tests to use JaCoCo coverage data
+  # ─────────────────────────────────────────────────────────
+  sonar-analysis:
+    name: SonarCloud Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build-and-test
+    # Only run Sonar on push (not on forks / dependabot PRs that lack secrets)
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Download JaCoCo reports from previous job
+        uses: actions/download-artifact@v4
+        with:
+          name: jacoco-reports
+
+      - name: Run SonarCloud Analysis
+        run: |
+          mvn sonar:sonar \
+            --batch-mode \
+            --no-transfer-progress \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }} \
+            -Dsonar.organization=beingakstyle \
+            -Dsonar.projectKey=beingakstyle_farm-kart-microservice
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # ─────────────────────────────────────────────────────────
+  # Job 3: Code Quality (Checkstyle + SpotBugs + PMD)
+  # ─────────────────────────────────────────────────────────
+  code-quality:
+    name: Code Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build-and-test
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run quality checks (Checkstyle + SpotBugs + PMD)
+        run: |
+          mvn verify -P quality \
+            --batch-mode \
+            --no-transfer-progress \
+            -DskipTests
+
+      - name: Upload SpotBugs reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spotbugs-reports
+          path: "**/target/spotbugsXml.xml"
+          retention-days: 14
+
+      - name: Upload PMD reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pmd-reports
+          path: "**/target/pmd.xml"
+          retention-days: 14
+
+  # ─────────────────────────────────────────────────────────
+  # Job 4: Security Scan (OWASP Dependency Check)
+  # Runs weekly on main OR on push to main
+  # ─────────────────────────────────────────────────────────
+  security-scan:
+    name: OWASP Dependency Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Run on push to main or via the scheduled security workflow
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Run OWASP Dependency Check
+        run: |
+          mvn verify -P security-scan \
+            --batch-mode \
+            --no-transfer-progress \
+            -DskipTests
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        continue-on-error: true   # Don't block merge; report findings
+
+      - name: Upload OWASP report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owasp-dependency-check-report
+          path: "**/target/dependency-check/**"
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────
+  # Job 5: Publish Maven Artifacts
+  # Runs only on push to main (release)
+  # ─────────────────────────────────────────────────────────
+  publish-artifacts:
+    name: Publish Artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build-and-test, sonar-analysis, code-quality]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Java ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          server-id: github
+          settings-path: ${{ github.workspace }}
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build and package (production)
+        run: |
+          mvn clean package \
+            --batch-mode \
+            --no-transfer-progress \
+            -DskipTests \
+            -Drevision=${{ github.sha }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: farm-kart-artifacts-${{ github.sha }}
+          path: |
+            **/target/*.jar
+            !**/target/original-*.jar
+          retention-days: 30

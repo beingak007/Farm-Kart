@@ -1,0 +1,84 @@
+.app-loading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  height: 3px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.app-loading-bar--active {
+  opacity: 1;
+}
+
+.app-loading-bar__track {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: rgba(26, 60, 42, 0.12);
+  overflow: hidden;
+}
+
+.app-loading-bar__fill {
+  display: block;
+  height: 100%;
+  width: 35%;
+  background: linear-gradient(90deg, var(--green-700), var(--green-300), var(--green-500));
+  border-radius: 0 2px 2px 0;
+  animation: appLoadingSlide 1.1s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(64, 145, 108, 0.55);
+}
+
+@keyframes appLoadingSlide {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(380%);
+  }
+}
+
+.app-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(250, 246, 239, 0.82);
+  backdrop-filter: blur(4px);
+}
+
+.app-loading-overlay__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.app-loading-overlay__content p {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--green-900);
+  letter-spacing: 0.02em;
+}
+
+.app-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(45, 106, 79, 0.2);
+  border-top-color: var(--green-700);
+  border-radius: 50%;
+  animation: appLoadingSpin 0.75s linear infinite;
+}
+
+@keyframes appLoadingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

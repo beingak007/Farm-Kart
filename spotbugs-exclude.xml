@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Farm Kart Microservices — SpotBugs Exclusion Filter
+    Excludes known false-positives and DTO/Entity classes from bug analysis.
+    https://spotbugs.readthedocs.io/en/stable/filter.html
+-->
+<FindBugsFilter>
+
+    <!-- Exclude generated code -->
+    <Match>
+        <Source name="~.*generated.*"/>
+    </Match>
+
+    <!-- Exclude DTOs — field injection / serialization patterns -->
+    <Match>
+        <Package name="~.*\.dto"/>
+    </Match>
+    <Match>
+        <Package name="~.*\.request"/>
+    </Match>
+    <Match>
+        <Package name="~.*\.response"/>
+    </Match>
+
+    <!-- Exclude JPA entities — nullable fields expected -->
+    <Match>
+        <Package name="~.*\.entity"/>
+    </Match>
+    <Match>
+        <Package name="~.*\.model"/>
+    </Match>
+
+    <!-- Exclude Spring @Configuration classes -->
+    <Match>
+        <Package name="~.*\.config"/>
+    </Match>
+    <Match>
+        <Package name="~.*\.configuration"/>
+    </Match>
+
+    <!-- Exclude *Application main classes -->
+    <Match>
+        <Class name="~.*Application"/>
+    </Match>
+
+    <!-- Suppress EI_EXPOSE_REP for Spring beans (intentional mutable injection) -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+        <Package name="~.*\.service.*"/>
+    </Match>
+
+    <!-- Suppress unread fields in Lombok-annotated classes -->
+    <Match>
+        <Bug pattern="URF_UNREAD_FIELD"/>
+    </Match>
+
+    <!-- Suppress null checks on Spring-injected fields (guaranteed by container) -->
+    <Match>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+        <Package name="~.*\.controller.*"/>
+    </Match>
+
+</FindBugsFilter>

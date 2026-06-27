@@ -1,0 +1,87 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: farmkart-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: farmkart
+      MYSQL_USER: farmkart
+      MYSQL_PASSWORD: farmkart
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ufarmkart", "-pfarmkart"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: farmkart-postgres
+    environment:
+      POSTGRES_USER: farmkart
+      POSTGRES_PASSWORD: farmkart
+      POSTGRES_DB: farmkart_framework
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U farmkart -d farmkart_framework"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: farmkart-redis
+    ports:
+      - "6379:6379"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: farmkart-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  farm-kart-app:
+    build:
+      context: .
+      dockerfile: farm-kart/Dockerfile
+    container_name: farmkart-app
+    ports:
+      - "8080:8080"
+    environment:
+      profile: dev
+      MYSQL_DATASOURCE_URL: jdbc:mysql://mysql:3306/farmkart?useSSL=false&allowPublicKeyRetrieval=true
+      MYSQL_DATASOURCE_USERNAME: farmkart
+      MYSQL_DATASOURCE_PASSWORD: farmkart
+      POSTGRES_DATASOURCE_URL: jdbc:postgresql://postgres:5432/farmkart_framework
+      POSTGRES_DATASOURCE_USERNAME: farmkart
+      POSTGRES_DATASOURCE_PASSWORD: farmkart
+      REDIS_HOST: redis
+    depends_on:
+      mysql:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  mysql_data:
+  postgres_data:
+  elasticsearch_data:

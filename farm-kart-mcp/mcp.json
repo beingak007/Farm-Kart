@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "farm-kart": {
+      "command": "node",
+      "args": [
+        "/home/akashs/Documents/AKASH_PERSONAL_WORK/FARM_CART_MICROSERVICE/farm-kart-mcp/dist/index.js"
+      ],
+      "env": {
+        "MARKETPLACE_URL":   "http://localhost:8080",
+        "FARMER_URL":        "http://localhost:8081/farmer-service",
+        "BUYER_URL":         "http://localhost:8082/buyer-service",
+        "LOGISTICS_URL":     "http://localhost:8083/logistics-service",
+        "WAREHOUSE_URL":     "http://localhost:8084/warehouse-service",
+        "MARKET_PRICE_URL":  "http://localhost:8085/market-price-service",
+        "ADMIN_URL":         "http://localhost:8086/admin-service",
+        "NOTIF_URL":         "http://localhost:8087/notification-service",
+        "CATALOG_URL":       "http://localhost:8088/catalog-service",
+        "REPORTING_URL":     "http://localhost:8089/reporting-service",
+        "AI_ADVISORY_URL":   "http://localhost:8090/ai-advisory-service"
+      }
+    }
+  }
+}

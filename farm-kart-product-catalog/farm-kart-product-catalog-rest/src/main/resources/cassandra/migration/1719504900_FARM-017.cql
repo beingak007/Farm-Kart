@@ -1,0 +1,8 @@
+-- FARM-017: Crop search event log (example — enable when Cassandra keyspace is provisioned)
+-- CREATE TABLE IF NOT EXISTS crop_search_events (
+--     crop_id bigint,
+--     event_time timestamp,
+--     event_type text,
+--     payload text,
+--     PRIMARY KEY ((crop_id), event_time)
+-- ) WITH CLUSTERING ORDER BY (event_time DESC);

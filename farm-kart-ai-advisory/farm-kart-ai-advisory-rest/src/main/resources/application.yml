@@ -1,0 +1,29 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /ai-advisory-service
+
+spring:
+  application:
+    name: ai-advisory-service
+  datasource:
+    url: ${AI_ADVISORY_DB_URL:jdbc:mysql://localhost:3306/farmkart_ai_advisory?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${AI_ADVISORY_DB_USER:farmkart}
+    password: ${AI_ADVISORY_DB_PASS:farmkart}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    out-of-order: true
+    locations: classpath:db/migration/ai_advisory
+
+springdoc:
+  api-docs:
+    path: /ai-advisory-service/api-docs
+  swagger-ui:
+    path: /ai-advisory-service/swagger-ui.html

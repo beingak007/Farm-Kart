@@ -1,0 +1,105 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in Farm Kart
+title: "[BUG] "
+labels: ["bug", "triage"]
+assignees:
+  - beingakstyle
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug. Please fill out the sections below as completely as possible.
+
+  - type: input
+    id: affected-service
+    attributes:
+      label: Affected Microservice
+      description: Which microservice is affected?
+      placeholder: "e.g., farm-kart-farmer, farm-kart-buyer, farm-kart-logistics"
+    validations:
+      required: true
+
+  - type: input
+    id: affected-endpoint
+    attributes:
+      label: Affected Endpoint (if applicable)
+      description: The HTTP method and path of the affected API endpoint.
+      placeholder: "e.g., POST /api/v1/farmers/register"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      value: |
+        1. Send request to '...'
+        2. With payload '...'
+        3. Observe '...'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened? Include any error messages or stack traces.
+    validations:
+      required: true
+
+  - type: input
+    id: java-version
+    attributes:
+      label: Java Version
+      placeholder: "e.g., 21"
+
+  - type: input
+    id: spring-boot-version
+    attributes:
+      label: Spring Boot Version
+      placeholder: "e.g., 3.3.5"
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - Local Development
+        - Docker Compose
+        - CI/CD Pipeline
+        - Staging
+        - Production
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output
+      description: Paste any relevant log lines here.
+      render: shell
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues and this is not a duplicate.
+          required: true
+        - label: I have included all required information above.
+          required: true
