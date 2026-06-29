@@ -49,7 +49,7 @@
         <!-- ── Code Quality Plugin Versions ── -->
         <jacoco.version>0.8.12</jacoco.version>
         <sonar.version>4.0.0.4121</sonar.version>
-        <checkstyle.version>3.4.0</checkstyle.version>
+        <checkstyle.version>3.6.0</checkstyle.version>
         <spotbugs.version>4.8.6.4</spotbugs.version>
         <pmd.version>3.24.0</pmd.version>
         <owasp.dependency.check.version>10.0.4</owasp.dependency.check.version>
