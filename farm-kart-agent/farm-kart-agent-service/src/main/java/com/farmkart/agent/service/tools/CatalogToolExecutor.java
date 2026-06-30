@@ -41,9 +41,9 @@ public class CatalogToolExecutor {
             int size    = node.path("size").asInt(10);
             String url  = catalogUrl + "/api/v1/catalog/crops/search?q=" + q + "&page=" + page + "&size=" + size;
             String resp = rest.getForObject(url, String.class);
-            return resp != null ? resp : "{\"error\": \"No data\"}";
+            return resp != null ? resp : ToolResponseErrors.NO_DATA;
         } catch (Exception ex) {
-            return "{\"error\": \"" + ex.getMessage() + "\"}";
+            return ToolResponseErrors.SERVICE_UNAVAILABLE;
         }
     }
 }

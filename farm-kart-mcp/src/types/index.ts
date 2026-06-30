@@ -30,11 +30,29 @@ export function getServiceConfig(): ServiceConfig {
 }
 
 // ── Common API response wrapper ───────────────────────────────────────────────
+export interface FieldErrorDetail {
+  field: string;
+  message: string;
+  code: string;
+}
+
+export interface ApiError {
+  code: string;
+  message: string;
+  details?: FieldErrorDetail[];
+}
+
+export interface ResponseMeta {
+  requestId: string;
+  timestamp: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
-  data: T;
+  data?: T;
   message?: string;
-  timestamp?: string;
+  error?: ApiError;
+  meta?: ResponseMeta;
 }
 
 // ── Domain types ─────────────────────────────────────────────────────────────

@@ -39,9 +39,9 @@ public class MarketPriceToolExecutor {
             String state = node.path("state").asText();
             String url   = marketPriceUrl + "/api/v1/market-prices/latest?cropName=" + crop + "&state=" + state;
             String response = rest.getForObject(url, String.class);
-            return response != null ? response : "{\"error\": \"No data\"}";
+            return response != null ? response : ToolResponseErrors.NO_DATA;
         } catch (Exception ex) {
-            return "{\"error\": \"" + ex.getMessage() + "\"}";
+            return ToolResponseErrors.SERVICE_UNAVAILABLE;
         }
     }
 }

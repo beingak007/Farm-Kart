@@ -1,11 +1,10 @@
 package com.farmkart.rest;
 
+import com.farmkart.rest.configuration.FarmKartAppConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Import;
-
-import com.farmkart.rest.configuration.FarmKartAppConfig;
 
 @SpringBootApplication
 @Import(FarmKartAppConfig.class)

@@ -1,4 +1,7 @@
 import { trackLoading } from './loadingTracker';
+import { ApiClientError, parseApiResponse } from './errors';
+
+export { ApiClientError };
 
 const API_BASE = '/farm-kart/api/v1';
 
@@ -6,10 +9,7 @@ async function request(path, options = {}) {
   trackLoading(true);
   try {
     const response = await fetch(`${API_BASE}${path}`, options);
-    const json = await response.json();
-    if (!response.ok || !json.success) {
-      throw new Error(json.message || 'Request failed');
-    }
+    const json = await parseApiResponse(response);
     return json.data;
   } finally {
     trackLoading(false);
@@ -20,10 +20,7 @@ async function fetchWithLoading(url, options = {}) {
   trackLoading(true);
   try {
     const response = await fetch(url, options);
-    const json = await response.json();
-    if (!response.ok || !json.success) {
-      throw new Error(json.message || 'Request failed');
-    }
+    const json = await parseApiResponse(response);
     return json.data;
   } finally {
     trackLoading(false);

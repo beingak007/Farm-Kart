@@ -87,11 +87,8 @@ public class SmsGateway {
             JsonNode result = objectMapper.readTree(response.body());
 
             if (response.statusCode() >= 400 || !result.path("return").asBoolean(false)) {
-                String reason = result.path("message").isArray()
-                        ? result.path("message").get(0).asText("SMS delivery failed")
-                        : result.path("message").asText("SMS delivery failed");
                 log.error("Fast2SMS failed for {}: status={} body={}", mobile, response.statusCode(), response.body());
-                throw new BusinessException("Failed to send OTP SMS: " + reason);
+                throw new BusinessException("Unable to send OTP SMS. Please try again later.");
             }
 
             log.info("SMS sent via Fast2SMS to {}", mobile);

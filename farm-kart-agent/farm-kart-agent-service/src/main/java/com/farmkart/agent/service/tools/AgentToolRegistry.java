@@ -62,12 +62,12 @@ public class AgentToolRegistry {
     public String execute(String toolName, String argsJson) {
         var exec = executors().get(toolName);
         if (exec == null) {
-            return "{\"error\": \"Unknown tool: " + toolName + "\"}";
+            return ToolResponseErrors.UNKNOWN_TOOL;
         }
         try {
             return exec.apply(argsJson);
         } catch (Exception ex) {
-            return "{\"error\": \"Tool execution failed: " + ex.getMessage() + "\"}";
+            return ToolResponseErrors.TOOL_FAILED;
         }
     }
 }

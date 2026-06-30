@@ -143,6 +143,7 @@ public class AiAdvisoryService {
             log.setInputJson(objectMapper.writeValueAsString(input));
             log.setOutputJson(objectMapper.writeValueAsString(output));
             advisoryRepo.save(log);
-        } catch (JsonProcessingException ignored) {}
+        } catch (JsonProcessingException ignored) {
+        }
     }
 }

@@ -35,9 +35,9 @@ public class FarmerToolExecutor {
             long userId = mapper.readTree(argsJson).path("userId").asLong();
             String response = rest.getForObject(
                 farmerUrl + "/api/v1/farmers/user/" + userId, String.class);
-            return response != null ? response : "{\"error\": \"No data\"}";
+            return response != null ? response : ToolResponseErrors.NO_DATA;
         } catch (Exception ex) {
-            return "{\"error\": \"" + ex.getMessage() + "\"}";
+            return ToolResponseErrors.SERVICE_UNAVAILABLE;
         }
     }
 }

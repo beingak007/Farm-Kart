@@ -37,9 +37,9 @@ public class LogisticsToolExecutor {
             String trackingNumber = node.path("trackingNumber").asText();
             String url  = logisticsUrl + "/api/v1/shipments/track/" + trackingNumber;
             String resp = rest.getForObject(url, String.class);
-            return resp != null ? resp : "{\"error\": \"No data\"}";
+            return resp != null ? resp : ToolResponseErrors.NO_DATA;
         } catch (Exception ex) {
-            return "{\"error\": \"" + ex.getMessage() + "\"}";
+            return ToolResponseErrors.SERVICE_UNAVAILABLE;
         }
     }
 }

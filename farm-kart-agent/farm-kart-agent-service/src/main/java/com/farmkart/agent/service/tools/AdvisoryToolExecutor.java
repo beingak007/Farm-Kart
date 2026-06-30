@@ -72,9 +72,9 @@ public class AdvisoryToolExecutor {
             ResponseEntity<String> resp = rest.exchange(
                 advisoryUrl + path, HttpMethod.POST,
                 new HttpEntity<>(bodyJson, headers), String.class);
-            return resp.getBody() != null ? resp.getBody() : "{\"error\": \"No data\"}";
+            return resp.getBody() != null ? resp.getBody() : ToolResponseErrors.NO_DATA;
         } catch (Exception ex) {
-            return "{\"error\": \"" + ex.getMessage() + "\"}";
+            return ToolResponseErrors.SERVICE_UNAVAILABLE;
         }
     }
 }
