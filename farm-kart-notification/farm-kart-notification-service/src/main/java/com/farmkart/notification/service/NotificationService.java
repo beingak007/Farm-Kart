@@ -39,6 +39,19 @@ public class NotificationService {
     }
 
     /**
+     * Domain-event-driven notification (Kafka consumer path).
+     */
+    @Transactional
+    public void sendDomainNotification(Long userId, NotificationChannel channel, String contact,
+                                       String templateCode, Map<String, String> templateVars) {
+        log.info("Domain notification userId={} template={}", userId, templateCode);
+        NotificationLog entry = buildLog(userId, channel, contact, templateCode,
+                renderMessage(templateCode, templateVars, null));
+        dispatch(entry);
+        notifRepo.save(entry);
+    }
+
+    /**
      * Synchronous send (REST-triggered).
      */
     @Transactional
@@ -114,6 +127,28 @@ public class NotificationService {
         if (fallbackBody != null && !fallbackBody.isBlank()) return fallbackBody;
         if ("OTP_LOGIN".equals(templateCode) && vars != null && vars.containsKey("otp")) {
             return "Your Farm Kart OTP is " + vars.get("otp") + ". Valid for 5 minutes. Do not share.";
+        }
+        if ("WELCOME".equals(templateCode)) {
+            return "Welcome to Farm Kart! Your account is ready.";
+        }
+        if ("FARMER_WELCOME".equals(templateCode) && vars != null) {
+            return "Welcome to Farm Kart! Farm " + vars.getOrDefault("farmName", "") + " registered in "
+                    + vars.getOrDefault("state", "") + ".";
+        }
+        if ("FARMER_VERIFIED".equals(templateCode)) {
+            return "Your Farm Kart farmer profile has been verified. You can now list crops.";
+        }
+        if ("ORDER_CONFIRMED".equals(templateCode) && vars != null) {
+            return "Order #" + vars.getOrDefault("orderId", "") + " confirmed. Total: INR "
+                    + vars.getOrDefault("total", "") + ".";
+        }
+        if ("PAYMENT_RECEIPT".equals(templateCode) && vars != null) {
+            return "Payment received for order #" + vars.getOrDefault("orderId", "") + ". Amount: INR "
+                    + vars.getOrDefault("amount", "") + ".";
+        }
+        if ("ORDER_DELIVERED".equals(templateCode) && vars != null) {
+            return "Order #" + vars.getOrDefault("orderId", "") + " delivered. Tracking: "
+                    + vars.getOrDefault("trackingNumber", "") + ".";
         }
         if (vars == null || vars.isEmpty()) return "[" + templateCode + "]";
         StringBuilder sb = new StringBuilder("[" + templateCode + "] ");

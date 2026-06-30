@@ -8,6 +8,10 @@ import com.farmkart.repository.UserRepository;
 import com.farmkart.service.security.JwtUtil;
 import com.farmkart.client.enums.UserRole;
 import com.farmkart.client.enums.AuthProvider;
+import com.farmkart.starter.common.events.DomainEventPublisher;
+import com.farmkart.starter.common.events.FkBaseEvent;
+import com.farmkart.starter.common.events.FkTopics;
+import com.farmkart.starter.common.events.UserRegisteredEvent;
 import com.farmkart.starter.common.exception.BusinessException;
 import com.farmkart.starter.common.sms.SmsGateway;
 import org.slf4j.Logger;
@@ -19,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.HexFormat;
 import java.util.Optional;
 
@@ -34,6 +39,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final OtpService otpService;
     private final SmsGateway smsGateway;
+    private final DomainEventPublisher eventPublisher;
 
     public AuthService(
             UserRepository userRepository,
@@ -41,13 +47,15 @@ public class AuthService {
             PasswordEncoder passwordEncoder,
             JwtUtil jwtUtil,
             OtpService otpService,
-            SmsGateway smsGateway) {
+            SmsGateway smsGateway,
+            DomainEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.otpService = otpService;
         this.smsGateway = smsGateway;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -71,6 +79,12 @@ public class AuthService {
         user.setEmailVerified(false);
         user.setMobileVerified(false);
         userRepository.save(user);
+
+        UserRegisteredEvent event = new UserRegisteredEvent(
+                new FkBaseEvent(FkTopics.USER_REGISTERED, "marketplace-service"),
+                user.getId(), user.getEmail(), user.getMobile(),
+                user.getRole().name(), Instant.now());
+        eventPublisher.publish(FkTopics.USER_REGISTERED, String.valueOf(user.getId()), event);
 
         String otp = otpService.generateAndStore(user.getMobile());
         dispatchOtp(user.getMobile(), otp);

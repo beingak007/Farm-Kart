@@ -3,9 +3,9 @@ package com.farmkart.market_price.service;
 import com.farmkart.market_price.client.dto.MandiPriceResponse;
 import com.farmkart.market_price.repository.MandiPriceRepository;
 import com.farmkart.market_price.repository.entity.MandiPrice;
+import com.farmkart.starter.common.events.DomainEventPublisher;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +16,11 @@ import java.util.List;
 public class MandiPriceService {
 
     private final MandiPriceRepository priceRepo;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final DomainEventPublisher eventPublisher;
 
-    public MandiPriceService(MandiPriceRepository priceRepo, KafkaTemplate<String, Object> kafkaTemplate) {
+    public MandiPriceService(MandiPriceRepository priceRepo, DomainEventPublisher eventPublisher) {
         this.priceRepo = priceRepo;
-        this.kafkaTemplate = kafkaTemplate;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -37,7 +37,7 @@ public class MandiPriceService {
     @Transactional
     public MandiPriceResponse ingestPrice(MandiPrice price) {
         MandiPrice saved = priceRepo.save(price);
-        kafkaTemplate.send(FkTopics.PRICE_UPDATED, saved.getCropName(),
+        eventPublisher.publish(FkTopics.PRICE_UPDATED, saved.getCropName(),
                 new FkBaseEvent(FkTopics.PRICE_UPDATED, "market-price-service"));
         return toResponse(saved);
     }

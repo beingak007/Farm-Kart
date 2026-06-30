@@ -15,6 +15,98 @@ A production-ready multi-module microservices platform (Java 21 + Spring Boot 3.
 
 ---
 
+## Platform Engineering (API + Events)
+
+Recent senior-architecture changes applied across all microservices. Source modules are listed so you know **where** each piece lives.
+
+### Standard API envelope (no internal errors exposed)
+
+All REST services return the same JSON contract. Internal stack traces, SQL, and provider errors never reach the client.
+
+| Component | Module / path |
+|---|---|
+| `ApiResponse`, `ApiError`, `ApiErrorCode`, `FieldErrorDetail`, `ResponseMeta` | `farm-kart-starter-common/.../dto/` |
+| `BusinessException` (safe user-facing messages + error codes) | `farm-kart-starter-common/.../exception/` |
+| `RequestContext` (correlation ID via MDC) | `farm-kart-starter-common/.../context/` |
+| `RequestIdFilter` (`X-Request-Id` on every request/response) | `farm-kart-common-rest/.../filter/` |
+| `GlobalExceptionHandler` (validation, 404, 409, 500 — safe messages only) | `farm-kart-common-rest/.../exception/` |
+| `ApiResponseBodyAdvice` (adds `meta.requestId` + `meta.timestamp` on success) | `farm-kart-common-rest/.../advice/` |
+| UI client — `ApiClientError`, `parseApiResponse()` | `farm-kart-ui/src/api/errors.js`, `client.js` |
+| MCP client — `FarmKartApiError`, typed `unwrap()` | `farm-kart-mcp/src/clients/api.ts`, `types/index.ts` |
+
+**Success response example:**
+
+```json
+{
+  "success": true,
+  "data": { "id": 101 },
+  "meta": { "requestId": "uuid", "timestamp": "2026-06-30T10:00:00Z" }
+}
+```
+
+**Error response example (UI-safe):**
+
+```json
+{
+  "success": false,
+  "message": "Farmer not found for userId: 42",
+  "error": { "code": "RESOURCE_NOT_FOUND", "message": "Farmer not found for userId: 42" },
+  "meta": { "requestId": "uuid", "timestamp": "2026-06-30T10:00:00Z" }
+}
+```
+
+**Validation errors** include `error.details[]` with `{ "field", "message", "code" }` for form-level UI display.
+
+---
+
+### Event-driven architecture (Kafka)
+
+Events publish **after DB commit** via `DomainEventPublisher` — no ghost events on rollback.
+
+| Component | Module / path |
+|---|---|
+| `FkTopics`, `FkBaseEvent`, domain event records | `farm-kart-starter-common/.../events/` |
+| `DomainEventPublisher` (transaction-aware publish) | `farm-kart-starter-common/.../events/` |
+| `FkKafkaAutoConfiguration`, `EventProcessingGuard` | `farm-kart-starter-common/.../configuration/` |
+| `FkKafkaConsumerConfiguration` (`@EnableKafka`) | `farm-kart-starter-common/.../events/` |
+| `PlatformAuditConsumer` (writes audit logs from domain events) | `farm-kart-admin/.../service/` |
+| `DomainNotificationConsumer` (welcome, order, payment, delivery alerts) | `farm-kart-notification/.../service/` |
+| `DurableEventGuard` + `processed_domain_events` table (idempotency) | `farm-kart-admin`, `farm-kart-notification` |
+
+**Event flow example (farmer onboard):**
+
+```
+POST /farmer-service/onboard
+  → DB save
+  → Kafka: farmkart.farmer.created
+  → Admin service: audit log
+  → Notification service: welcome PUSH/SMS
+```
+
+**Producers (who publishes what):**
+
+| Service | Topics published |
+|---|---|
+| Marketplace (8080) | `user.registered`, `order.created`, `order.cancelled`, `payment.success`, `payment.failed`, `sheet.uploaded` |
+| Farmer (8081) | `farmer.created`, `farmer.verified` |
+| Buyer (8082) | `buyer.created` |
+| Logistics (8083) | `shipment.created`, `shipment.delivered` |
+| Warehouse (8084) | `warehouse.booked` |
+| Market Price (8085) | `market.price.updated` |
+| Product Catalog (8088) | `crop.listed` |
+
+**Consumers:**
+
+| Service | Listens to | Action |
+|---|---|---|
+| Admin (8086) | All major domain topics | Persist `audit_logs` |
+| Notification (8087) | `user.registered`, `farmer.*`, `order.created`, `payment.success`, `shipment.delivered` | SMS / Push / Email |
+| Notification (8087) | `notification.triggered` | Template-based dispatch (existing) |
+
+**Developer rule:** use `DomainEventPublisher.publish(topic, key, event)` in services — not raw `KafkaTemplate.send()`.
+
+---
+
 ## Architecture Overview
 
 ```
@@ -49,13 +141,17 @@ A production-ready multi-module microservices platform (Java 21 + Spring Boot 3.
 farm-kart-parent/                         ← Root Maven POM (Java 21)
 │
 ├── farm-kart-starter-common/             ← Shared foundation
-│   ├── ApiResponse, BusinessException
+│   ├── ApiResponse, ApiError, ApiErrorCode, BusinessException
+│   ├── DomainEventPublisher, FkKafkaAutoConfiguration
 │   ├── FkTopics.java                     All Kafka topic constants
 │   ├── FkCacheNames.java                 All Redis cache key constants
 │   ├── RedisConfig.java                  Shared Redis/cache configuration
-│   └── Domain events (FarmerCreatedEvent, OrderCreatedEvent, etc.)
+│   └── Domain events (FarmerCreatedEvent, OrderCreatedEvent, UserRegisteredEvent, etc.)
 │
-├── farm-kart-common-rest/                ← REST config, global exception handler
+├── farm-kart-common-rest/                ← REST config, exception handling, request tracing
+│   ├── GlobalExceptionHandler            Safe API errors (no internal leaks)
+│   ├── RequestIdFilter                   X-Request-Id correlation
+│   └── ApiResponseBodyAdvice             meta on every response
 ├── farm-kart-framework/                  ← Dynamic view/model metadata engine
 │
 ├── farm-kart/                            ← Marketplace Service     (port 8080)
@@ -88,14 +184,14 @@ farm-kart-<service>/
 
 | Service | Port | DB | Key Features |
 |---|---|---|---|
-| **Marketplace** | 8080 | farmkart_marketplace | Auth (JWT/OAuth2), Orders, Payments, S3 uploads, Kafka streaming |
+| **Marketplace** | 8080 | farmkart_marketplace | Auth (JWT/OAuth2), Orders, Payments, S3 uploads, **publishes user/order/payment/sheet events** |
 | **Farmer** | 8081 | farmkart_farmer | Farmer onboarding, farm details, verification, state/district search |
 | **Buyer** | 8082 | farmkart_buyer | Buyer onboarding (Individual/Retailer/Exporter), profile management |
 | **Logistics** | 8083 | farmkart_logistics | Shipment creation, tracking number, status updates |
 | **Warehouse** | 8084 | farmkart_warehouse | Warehouse listing, cold storage, booking with auto cost calc |
 | **Market Price** | 8085 | farmkart_market_price | Mandi rate ingestion, latest prices, historical analytics |
-| **Admin** | 8086 | farmkart_admin | Audit log storage, query by user/service/resource |
-| **Notification** | 8087 | farmkart_notification | SMS/Email/Push/WhatsApp via Kafka consumer + REST, template-based |
+| **Admin** | 8086 | farmkart_admin | Audit log storage, **Kafka audit consumer** (`PlatformAuditConsumer`), query by user/service/resource |
+| **Notification** | 8087 | farmkart_notification | SMS/Email/Push/WhatsApp, **domain event consumer** (`DomainNotificationConsumer`), template-based |
 | **Product Catalog** | 8088 | farmkart_product_catalog | Crop categories, crop CRUD, full-text search, organic filter |
 | **Reporting** | 8089 | farmkart_reporting | Async report jobs (SALES, ORDER_SUMMARY, FARMER_ACTIVITY, etc.) |
 | **AI Advisory** | 8090 | farmkart_ai_advisory | Crop recommendations by season/soil, demand & price forecasting |
@@ -104,7 +200,9 @@ farm-kart-<service>/
 
 ## Event-Driven Architecture (Kafka)
 
-All topics are centralised in `FkTopics.java`:
+All topics are centralised in `FkTopics.java` (`farm-kart-starter-common`).
+
+### Topic registry
 
 ```
 farmkart.user.registered          farmkart.farmer.created
@@ -118,6 +216,21 @@ farmkart.shipment.delivered       farmkart.warehouse.booked
 farmkart.market.price.updated     farmkart.notification.triggered
 farmkart.sheet.uploaded           farmkart.audit.log.created
 ```
+
+### Publish / consume pattern
+
+```
+┌─────────────┐   afterCommit    ┌───────────────┐   consume   ┌──────────────────┐
+│  Service    │ ───────────────► │ Kafka (topic) │ ──────────► │ Admin / Notif    │
+│  (producer) │ DomainEventPub.  │ FkBaseEvent   │  idempotent │ (consumer)       │
+└─────────────┘                  └───────────────┘             └──────────────────┘
+```
+
+- **Publish:** `DomainEventPublisher` in `farm-kart-starter-common` — called from service layer after DB save.
+- **Consume:** `@KafkaListener` in Admin (`PlatformAuditConsumer`) and Notification (`DomainNotificationConsumer`).
+- **Idempotency:** `processed_domain_events` table + `DurableEventGuard` prevents duplicate processing on Kafka retry.
+
+See **[Platform Engineering](#platform-engineering-api--events)** above for full file paths and producer/consumer tables.
 
 ---
 
@@ -258,7 +371,8 @@ SKIP_BUILD=1 ./dev-local-startup.sh  # skip Maven build
 - OAuth2 Social Login (Google)
 - Role-Based Access Control (FARMER / BUYER / LOGISTICS_PARTNER / WAREHOUSE_PARTNER / REGIONAL_ADMIN / MASTER_ADMIN)
 - OTP-based phone verification
-- Audit logging via Admin Service
+- Audit logging via Admin Service (REST + **Kafka event consumer**)
+- **Safe API errors** — internal exceptions logged server-side only; clients receive structured `ApiError` codes
 
 ---
 

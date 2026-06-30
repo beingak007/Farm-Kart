@@ -4,22 +4,25 @@ import com.farmkart.buyer.client.dto.BuyerOnboardRequest;
 import com.farmkart.buyer.client.dto.BuyerResponse;
 import com.farmkart.buyer.repository.BuyerRepository;
 import com.farmkart.buyer.repository.entity.Buyer;
+import com.farmkart.starter.common.events.BuyerCreatedEvent;
+import com.farmkart.starter.common.events.DomainEventPublisher;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
 import com.farmkart.starter.common.exception.BusinessException;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
 
 @Service
 public class BuyerService {
 
     private final BuyerRepository buyerRepo;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final DomainEventPublisher eventPublisher;
 
-    public BuyerService(BuyerRepository buyerRepo, KafkaTemplate<String, Object> kafkaTemplate) {
+    public BuyerService(BuyerRepository buyerRepo, DomainEventPublisher eventPublisher) {
         this.buyerRepo = buyerRepo;
-        this.kafkaTemplate = kafkaTemplate;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -37,8 +40,12 @@ public class BuyerService {
         buyer.setCompanyName(req.companyName());
         if (req.buyerType() != null) buyer.setBuyerType(req.buyerType());
         buyer = buyerRepo.save(buyer);
-        kafkaTemplate.send(FkTopics.BUYER_CREATED, String.valueOf(buyer.getId()),
-                new FkBaseEvent(FkTopics.BUYER_CREATED, "buyer-service"));
+
+        BuyerCreatedEvent event = new BuyerCreatedEvent(
+                new FkBaseEvent(FkTopics.BUYER_CREATED, "buyer-service"),
+                buyer.getId(), buyer.getUserId(), buyer.getDisplayName(),
+                buyer.getState(), Instant.now());
+        eventPublisher.publish(FkTopics.BUYER_CREATED, String.valueOf(buyer.getId()), event);
         return toResponse(buyer);
     }
 

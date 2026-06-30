@@ -8,6 +8,7 @@ import com.farmkart.product_catalog.repository.CropRepository;
 import com.farmkart.product_catalog.repository.entity.Crop;
 import com.farmkart.product_catalog.repository.entity.CropCategory;
 import com.farmkart.starter.common.cache.FkCacheNames;
+import com.farmkart.starter.common.events.DomainEventPublisher;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
 import com.farmkart.starter.common.exception.BusinessException;
@@ -15,7 +16,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,14 +26,14 @@ public class CropCatalogService {
 
     private final CropRepository cropRepo;
     private final CropCategoryRepository categoryRepo;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final DomainEventPublisher eventPublisher;
 
     public CropCatalogService(CropRepository cropRepo,
                                CropCategoryRepository categoryRepo,
-                               KafkaTemplate<String, Object> kafkaTemplate) {
+                               DomainEventPublisher eventPublisher) {
         this.cropRepo = cropRepo;
         this.categoryRepo = categoryRepo;
-        this.kafkaTemplate = kafkaTemplate;
+        this.eventPublisher = eventPublisher;
     }
 
     // ── Categories ────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ public class CropCatalogService {
         crop.setGradeStandard(req.gradeStandard());
         if (req.isOrganic() != null) crop.setIsOrganic(req.isOrganic());
         crop = cropRepo.save(crop);
-        kafkaTemplate.send(FkTopics.CROP_LISTED, String.valueOf(crop.getId()),
+        eventPublisher.publish(FkTopics.CROP_LISTED, String.valueOf(crop.getId()),
                 new FkBaseEvent(FkTopics.CROP_LISTED, "product-catalog-service"));
         return toResponse(crop);
     }

@@ -6,12 +6,12 @@ import com.farmkart.warehouse.repository.WarehouseBookingRepository;
 import com.farmkart.warehouse.repository.WarehouseRepository;
 import com.farmkart.warehouse.repository.entity.Warehouse;
 import com.farmkart.warehouse.repository.entity.WarehouseBooking;
+import com.farmkart.starter.common.events.DomainEventPublisher;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
 import com.farmkart.starter.common.exception.BusinessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,14 +26,14 @@ public class WarehouseService {
 
     private final WarehouseRepository warehouseRepo;
     private final WarehouseBookingRepository bookingRepo;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final DomainEventPublisher eventPublisher;
 
     public WarehouseService(WarehouseRepository warehouseRepo,
                              WarehouseBookingRepository bookingRepo,
-                             KafkaTemplate<String, Object> kafkaTemplate) {
+                             DomainEventPublisher eventPublisher) {
         this.warehouseRepo = warehouseRepo;
         this.bookingRepo = bookingRepo;
-        this.kafkaTemplate = kafkaTemplate;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -71,7 +71,7 @@ public class WarehouseService {
         booking.setTotalCost(cost);
         booking = bookingRepo.save(booking);
 
-        kafkaTemplate.send(FkTopics.WAREHOUSE_BOOKED, String.valueOf(booking.getId()),
+        eventPublisher.publish(FkTopics.WAREHOUSE_BOOKED, String.valueOf(booking.getId()),
                 new FkBaseEvent(FkTopics.WAREHOUSE_BOOKED, "warehouse-service"));
         return booking.getId();
     }

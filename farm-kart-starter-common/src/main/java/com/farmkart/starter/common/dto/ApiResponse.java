@@ -17,7 +17,7 @@ public record ApiResponse<T>(
         String message,
         T data,
         ApiError error,
-        ResponseMeta responseMeta
+        ResponseMeta meta
 ) {
 
     public static <T> ApiResponse<T> ok(T data) {

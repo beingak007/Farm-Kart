@@ -6,13 +6,13 @@ import com.farmkart.farmer.client.dto.FarmUpdateRequest;
 import com.farmkart.farmer.client.enums.FarmerStatus;
 import com.farmkart.farmer.repository.FarmerRepository;
 import com.farmkart.farmer.repository.entity.Farmer;
+import com.farmkart.starter.common.events.DomainEventPublisher;
 import com.farmkart.starter.common.events.FarmerCreatedEvent;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
 import com.farmkart.starter.common.exception.BusinessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +22,12 @@ import java.time.Instant;
 public class FarmerService {
 
     private final FarmerRepository farmerRepo;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final DomainEventPublisher eventPublisher;
 
     public FarmerService(FarmerRepository farmerRepo,
-                         KafkaTemplate<String, Object> kafkaTemplate) {
+                         DomainEventPublisher eventPublisher) {
         this.farmerRepo = farmerRepo;
-        this.kafkaTemplate = kafkaTemplate;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -54,7 +54,7 @@ public class FarmerService {
                 new FkBaseEvent(FkTopics.FARMER_CREATED, "farmer-service"),
                 farmer.getId(), farmer.getUserId(), farmer.getFarmName(),
                 farmer.getState(), farmer.getDistrict(), Instant.now());
-        kafkaTemplate.send(FkTopics.FARMER_CREATED, String.valueOf(farmer.getId()), event);
+        eventPublisher.publish(FkTopics.FARMER_CREATED, String.valueOf(farmer.getId()), event);
 
         return toResponse(farmer);
     }
@@ -108,7 +108,7 @@ public class FarmerService {
                 .orElseThrow(() -> new BusinessException(404, "Farmer not found: " + farmerId));
         farmer.setStatus(FarmerStatus.VERIFIED);
         farmer = farmerRepo.save(farmer);
-        kafkaTemplate.send(FkTopics.FARMER_VERIFIED, String.valueOf(farmerId),
+        eventPublisher.publish(FkTopics.FARMER_VERIFIED, String.valueOf(farmerId),
                 new FkBaseEvent(FkTopics.FARMER_VERIFIED, "farmer-service"));
         return toResponse(farmer);
     }

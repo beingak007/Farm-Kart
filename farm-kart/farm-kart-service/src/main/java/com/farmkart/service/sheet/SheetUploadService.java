@@ -4,7 +4,6 @@ import com.farmkart.client.dto.sheet.SheetUploadResponse;
 import com.farmkart.repository.SheetUploadRepository;
 import com.farmkart.repository.entity.SheetUpload;
 import com.farmkart.service.kafka.SheetUploadProducer;
-import com.farmkart.service.kafka.event.SheetUploadedEvent;
 import com.farmkart.service.storage.S3Service;
 import com.farmkart.starter.common.exception.BusinessException;
 import org.slf4j.Logger;
@@ -68,14 +67,14 @@ public class SheetUploadService {
         sheetUploadRepository.save(upload);
 
         // Fire Kafka event for async row-counting / import
-        producer.publish(new SheetUploadedEvent(
+        producer.publish(producer.wrap(new SheetUploadProducer.Payload(
                 upload.getId(),
                 userId,
                 s3Key,
                 extension,
                 file.getSize(),
                 file.getOriginalFilename(),
-                Instant.now()));
+                Instant.now())));
 
         log.info("[Sheet] Uploaded to S3 and queued: uploadId={} s3Key={}", upload.getId(), s3Key);
 

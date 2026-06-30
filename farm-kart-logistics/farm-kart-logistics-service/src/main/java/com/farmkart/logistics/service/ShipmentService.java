@@ -4,13 +4,14 @@ import com.farmkart.logistics.client.dto.CreateShipmentRequest;
 import com.farmkart.logistics.client.dto.ShipmentResponse;
 import com.farmkart.logistics.repository.ShipmentRepository;
 import com.farmkart.logistics.repository.entity.Shipment;
+import com.farmkart.starter.common.events.DomainEventPublisher;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
 import com.farmkart.starter.common.events.ShipmentCreatedEvent;
+import com.farmkart.starter.common.events.ShipmentDeliveredEvent;
 import com.farmkart.starter.common.exception.BusinessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,11 +23,11 @@ import java.util.UUID;
 public class ShipmentService {
 
     private final ShipmentRepository shipmentRepo;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final DomainEventPublisher eventPublisher;
 
-    public ShipmentService(ShipmentRepository shipmentRepo, KafkaTemplate<String, Object> kafkaTemplate) {
+    public ShipmentService(ShipmentRepository shipmentRepo, DomainEventPublisher eventPublisher) {
         this.shipmentRepo = shipmentRepo;
-        this.kafkaTemplate = kafkaTemplate;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -47,7 +48,7 @@ public class ShipmentService {
                 s.getId(), s.getOrderId(), s.getLogisticsPartnerId(),
                 s.getTrackingNumber(), s.getPickupAddress(), s.getDeliveryAddress(),
                 s.getExpectedDelivery());
-        kafkaTemplate.send(FkTopics.SHIPMENT_CREATED, String.valueOf(s.getId()), event);
+        eventPublisher.publish(FkTopics.SHIPMENT_CREATED, String.valueOf(s.getId()), event);
         return toResponse(s);
     }
 
@@ -73,9 +74,12 @@ public class ShipmentService {
                 .orElseThrow(() -> new BusinessException(404, "Shipment not found: " + shipmentId));
         s.setStatus(newStatus);
         if ("DELIVERED".equals(newStatus)) {
-            s.setActualDelivery(Instant.now());
-            kafkaTemplate.send(FkTopics.SHIPMENT_DELIVERED, String.valueOf(shipmentId),
-                    new FkBaseEvent(FkTopics.SHIPMENT_DELIVERED, "logistics-service"));
+            Instant deliveredAt = Instant.now();
+            s.setActualDelivery(deliveredAt);
+            ShipmentDeliveredEvent event = new ShipmentDeliveredEvent(
+                    new FkBaseEvent(FkTopics.SHIPMENT_DELIVERED, "logistics-service"),
+                    s.getId(), s.getOrderId(), s.getTrackingNumber(), deliveredAt);
+            eventPublisher.publish(FkTopics.SHIPMENT_DELIVERED, String.valueOf(shipmentId), event);
         }
         return toResponse(shipmentRepo.save(s));
     }

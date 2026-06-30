@@ -1,8 +1,9 @@
-package com.farmkart.service.kafka.event;
+package com.farmkart.starter.common.events;
 
 import java.time.Instant;
 
-public record SheetUploadedEvent(
+public record SheetUploadedDomainEvent(
+        FkBaseEvent base,
         Long uploadId,
         Long userId,
         String s3Key,
@@ -10,5 +11,4 @@ public record SheetUploadedEvent(
         long fileSize,
         String originalName,
         Instant uploadedAt
-) {
-}
+) {}

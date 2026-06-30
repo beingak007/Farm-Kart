@@ -1,24 +1,32 @@
 package com.farmkart.service.order;
 
-import com.farmkart.starter.common.exception.BusinessException;
 import com.farmkart.client.dto.order.CreateOrderRequest;
 import com.farmkart.client.dto.order.OrderResponse;
-import com.farmkart.repository.entity.Order;
-import com.farmkart.repository.entity.OrderItem;
 import com.farmkart.client.enums.OrderStatus;
 import com.farmkart.repository.OrderRepository;
+import com.farmkart.repository.entity.Order;
+import com.farmkart.repository.entity.OrderItem;
+import com.farmkart.starter.common.events.DomainEventPublisher;
+import com.farmkart.starter.common.events.FkBaseEvent;
+import com.farmkart.starter.common.events.FkTopics;
+import com.farmkart.starter.common.events.OrderCancelledEvent;
+import com.farmkart.starter.common.events.OrderCreatedEvent;
+import com.farmkart.starter.common.exception.BusinessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final DomainEventPublisher eventPublisher;
 
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(OrderRepository orderRepository, DomainEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -42,6 +50,13 @@ public class OrderService {
         }
         order.setTotalAmount(total);
         orderRepository.save(order);
+
+        OrderCreatedEvent event = new OrderCreatedEvent(
+                new FkBaseEvent(FkTopics.ORDER_CREATED, "marketplace-service"),
+                order.getId(), order.getBuyerId(), order.getVendorId(),
+                order.getTotalAmount(), "INR", Instant.now());
+        eventPublisher.publish(FkTopics.ORDER_CREATED, String.valueOf(order.getId()), event);
+
         return toResponse(order);
     }
 
@@ -60,6 +75,12 @@ public class OrderService {
             throw new BusinessException("Order cannot be cancelled");
         }
         order.setStatus(OrderStatus.CANCELLED);
+
+        OrderCancelledEvent event = new OrderCancelledEvent(
+                new FkBaseEvent(FkTopics.ORDER_CANCELLED, "marketplace-service"),
+                order.getId(), order.getBuyerId(), "User requested cancellation", Instant.now());
+        eventPublisher.publish(FkTopics.ORDER_CANCELLED, String.valueOf(order.getId()), event);
+
         return toResponse(order);
     }
 
