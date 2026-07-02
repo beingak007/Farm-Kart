@@ -1,0 +1,22 @@
+# Shared dev profile — imported by every microservice (application-dev.yml)
+logging:
+  level:
+    root: INFO
+    com.farmkart: DEBUG
+    org.apache.kafka: INFO
+    org.springframework.kafka: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+farmkart:
+  env: dev

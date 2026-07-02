@@ -1,6 +1,7 @@
 package com.farmkart.service.kafka;
 
 import com.farmkart.starter.common.events.DomainEventPublisher;
+import com.farmkart.client.constants.MarketplaceServiceConstants;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
 import com.farmkart.starter.common.events.SheetUploadedDomainEvent;
@@ -26,7 +27,7 @@ public class SheetUploadProducer {
 
     public SheetUploadedDomainEvent wrap(Payload payload) {
         return new SheetUploadedDomainEvent(
-                new FkBaseEvent(FkTopics.SHEET_UPLOADED, "marketplace-service"),
+                new FkBaseEvent(FkTopics.SHEET_UPLOADED, MarketplaceServiceConstants.SERVICE_NAME),
                 payload.uploadId(),
                 payload.userId(),
                 payload.s3Key(),

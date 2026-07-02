@@ -6,6 +6,10 @@ import com.farmkart.client.enums.OrderStatus;
 import com.farmkart.repository.OrderRepository;
 import com.farmkart.repository.entity.Order;
 import com.farmkart.repository.entity.OrderItem;
+import com.farmkart.client.constants.MarketplaceServiceConstants;
+import com.farmkart.client.enums.OrderCancelReasonEnum;
+import com.farmkart.starter.common.constants.FkCurrencyConstants;
+import com.farmkart.starter.common.enums.FkCurrencyEnum;
 import com.farmkart.starter.common.events.DomainEventPublisher;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
@@ -51,10 +55,12 @@ public class OrderService {
         order.setTotalAmount(total);
         orderRepository.save(order);
 
+        FkCurrencyEnum currency = resolveCurrency(request.currency());
+
         OrderCreatedEvent event = new OrderCreatedEvent(
-                new FkBaseEvent(FkTopics.ORDER_CREATED, "marketplace-service"),
+                new FkBaseEvent(FkTopics.ORDER_CREATED, MarketplaceServiceConstants.SERVICE_NAME),
                 order.getId(), order.getBuyerId(), order.getVendorId(),
-                order.getTotalAmount(), "INR", Instant.now());
+                order.getTotalAmount(), currency.getValue(), Instant.now());
         eventPublisher.publish(FkTopics.ORDER_CREATED, String.valueOf(order.getId()), event);
 
         return toResponse(order);
@@ -77,8 +83,8 @@ public class OrderService {
         order.setStatus(OrderStatus.CANCELLED);
 
         OrderCancelledEvent event = new OrderCancelledEvent(
-                new FkBaseEvent(FkTopics.ORDER_CANCELLED, "marketplace-service"),
-                order.getId(), order.getBuyerId(), "User requested cancellation", Instant.now());
+                new FkBaseEvent(FkTopics.ORDER_CANCELLED, MarketplaceServiceConstants.SERVICE_NAME),
+                order.getId(), order.getBuyerId(), OrderCancelReasonEnum.USER_REQUESTED.getValue(), Instant.now());
         eventPublisher.publish(FkTopics.ORDER_CANCELLED, String.valueOf(order.getId()), event);
 
         return toResponse(order);
@@ -99,5 +105,16 @@ public class OrderService {
                 order.getShippingAddress(),
                 items,
                 order.getCreatedAt());
+    }
+
+    private FkCurrencyEnum resolveCurrency(String currencyCode) {
+        if (currencyCode == null || currencyCode.isBlank()) {
+            return FkCurrencyConstants.DEFAULT;
+        }
+        FkCurrencyEnum currency = FkCurrencyEnum.getFkCurrencyEnum(currencyCode.toUpperCase());
+        if (currency == null) {
+            throw new BusinessException("Unsupported currency: " + currencyCode);
+        }
+        return currency;
     }
 }

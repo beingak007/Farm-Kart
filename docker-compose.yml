@@ -65,7 +65,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      profile: dev
+      SPRING_PROFILES_ACTIVE: dev
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}
       MYSQL_DATASOURCE_URL: jdbc:mysql://mysql:3306/farmkart?useSSL=false&allowPublicKeyRetrieval=true
       MYSQL_DATASOURCE_USERNAME: farmkart
       MYSQL_DATASOURCE_PASSWORD: farmkart

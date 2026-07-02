@@ -8,6 +8,7 @@ import com.farmkart.product_catalog.repository.CropRepository;
 import com.farmkart.product_catalog.repository.entity.Crop;
 import com.farmkart.product_catalog.repository.entity.CropCategory;
 import com.farmkart.starter.common.cache.FkCacheNames;
+import com.farmkart.product_catalog.constants.ProductCatalogServiceConstants;
 import com.farmkart.starter.common.events.DomainEventPublisher;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
@@ -75,7 +76,7 @@ public class CropCatalogService {
         if (req.isOrganic() != null) crop.setIsOrganic(req.isOrganic());
         crop = cropRepo.save(crop);
         eventPublisher.publish(FkTopics.CROP_LISTED, String.valueOf(crop.getId()),
-                new FkBaseEvent(FkTopics.CROP_LISTED, "product-catalog-service"));
+                new FkBaseEvent(FkTopics.CROP_LISTED, ProductCatalogServiceConstants.SERVICE_NAME));
         return toResponse(crop);
     }
 

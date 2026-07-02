@@ -320,16 +320,77 @@ Flyway settings (all services): `baseline-on-migrate`, `out-of-order`, `validate
 
 ```
 Java 21+    Maven 3.9+    MySQL 8 (user: farmkart / pass: farmkart)
-Kafka on localhost:9092    Redis on localhost:6379
+Docker      (recommended — Kafka + Kafka UI via ./scripts/kafka-infra.sh start)
+Redis on localhost:6379
 ```
+
+### Kafka + Kafka UI (Provectus)
+
+Local dev ships a **KRaft Kafka broker** and **[Provectus Kafka UI](https://github.com/provectus/kafka-ui)** for topic/consumer-group inspection.
+
+```bash
+./scripts/kafka-infra.sh start          # Kafka :9092 + UI :8099
+./scripts/kafka-infra.sh topics         # list farmkart.* topics
+./scripts/kafka-infra.sh health         # broker + UI health
+./scripts/kafka-infra.sh stop
+```
+
+| Component | URL / endpoint |
+|---|---|
+| **Kafka UI** | http://localhost:8099 |
+| Bootstrap (host JVM services) | `localhost:9092` |
+| Bootstrap (Docker network) | `kafka:29092` |
+
+Topics are **pre-created** from `FkTopics.java` on first start (`infra/kafka/scripts/init-topics.sh`).
+
+**Production:** Kafka UI connects to AWS MSK / secured cluster — see `infra/kafka/README.md` and `infra/kafka/k8s/`.
+
+```bash
+# Prod (UI only — brokers external)
+cp infra/kafka/.env.example infra/kafka/.env   # fill SASL + UI password
+./scripts/kafka-infra.sh start prod
+```
+
+`dev-local-startup.sh` auto-starts Kafka when Docker is available (`START_KAFKA=0` to skip).
 
 ### Start all services
 
 ```bash
-./dev-local-startup.sh           # build + start everything
+./dev-local-startup.sh           # spring.profiles.active=dev (default)
+SPRING_PROFILE=prod ./dev-local-startup.sh   # prod profile locally
+./prod-local-startup.sh          # shorthand for prod profile
 SKIP_BUILD=1 ./dev-local-startup.sh  # skip Maven build
 ./dev-local-stop.sh              # stop all
 ```
+
+### Spring profiles (`dev` / `prod`)
+
+Every microservice uses `application.yml` (base) + profile-specific overrides:
+
+| File | Purpose |
+|---|---|
+| `application.yml` | Shared defaults (all environments) |
+| `application-dev.yml` | Debug logging, Swagger enabled, console SMS, dev Kafka groups |
+| `application-prod.yml` | Swagger off, stricter Flyway, larger pools, secrets required |
+| `config/application-*-common.yml` | Shared profile rules in `farm-kart-starter-common` |
+
+```bash
+# Single service (JAR)
+java -jar farm-kart-rest.jar --spring.profiles.active=dev
+java -jar farm-kart-rest.jar --spring.profiles.active=prod
+
+# Docker
+SPRING_PROFILES_ACTIVE=prod docker compose up farm-kart-app
+```
+
+| Setting | `dev` | `prod` |
+|---|---|---|
+| Swagger / OpenAPI | Enabled | Disabled |
+| Logging | `DEBUG` for `com.farmkart` | `WARN` root, `INFO` app |
+| Flyway validate | Relaxed | Strict |
+| JWT secret | Dev default | **`JWT_SECRET` required** |
+| SMS | `console` | `fast2sms` (or env) |
+| Kafka consumer groups | `*-dev` suffix | Production names |
 
 ### Swagger UIs
 
@@ -347,6 +408,7 @@ SKIP_BUILD=1 ./dev-local-startup.sh  # skip Maven build
 | Reporting | http://localhost:8089/reporting-service/swagger-ui.html |
 | AI Advisory | http://localhost:8090/ai-advisory-service/swagger-ui.html |
 | React UI | http://localhost:5173 |
+| **Kafka UI (Provectus)** | http://localhost:8099 |
 
 ---
 
@@ -354,7 +416,10 @@ SKIP_BUILD=1 ./dev-local-startup.sh  # skip Maven build
 
 | Variable | Default | Used by |
 |---|---|---|
+| `SPRING_PROFILE` / `SPRING_PROFILES_ACTIVE` | `dev` (local) / `prod` (Docker default) | All services |
 | `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | All services |
+| `KAFKA_UI_PORT` | `8099` | Kafka UI (dev/prod) |
+| `KAFKA_UI_USERNAME` / `KAFKA_UI_PASSWORD` | — | Prod Kafka UI login |
 | `REDIS_HOST` / `REDIS_PORT` | `localhost` / `6379` | All services |
 | `DB_HOST` / `DB_PORT` | `localhost` / `3306` | dev-local-startup |
 | `DB_USER` / `DB_PASS` | `farmkart` / `farmkart` | dev-local-startup |

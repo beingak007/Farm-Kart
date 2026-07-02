@@ -8,6 +8,7 @@ public record PaymentFailedEvent(
         Long paymentId,
         Long orderId,
         BigDecimal amount,
+        String currency,
         String failureReason,
         Instant failedAt
 ) {}

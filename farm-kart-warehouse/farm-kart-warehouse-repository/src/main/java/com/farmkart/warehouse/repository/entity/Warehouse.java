@@ -1,5 +1,6 @@
 package com.farmkart.warehouse.repository.entity;
 
+import com.farmkart.warehouse.enums.WarehouseStatusEnum;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -37,7 +38,7 @@ public class Warehouse {
     private boolean coldStorage;
 
     @Column(name = "status", nullable = false)
-    private String status = "ACTIVE";
+    private String status = WarehouseStatusEnum.ACTIVE.getValue();
 
     @Column(name = "owner_id")
     private Long ownerId;

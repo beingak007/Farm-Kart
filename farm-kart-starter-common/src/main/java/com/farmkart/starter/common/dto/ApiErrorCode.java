@@ -1,10 +1,13 @@
 package com.farmkart.starter.common.dto;
 
+import com.farmkart.starter.common.enums.StringValuedEnum;
+import com.farmkart.starter.common.enums.StringValuedEnumSupport;
+
 /**
  * Stable, machine-readable error codes returned to API clients.
  * UI and integrations should branch on {@code code}, not HTTP status alone.
  */
-public enum ApiErrorCode {
+public enum ApiErrorCode implements StringValuedEnum {
 
     VALIDATION_FAILED("VALIDATION_FAILED", "One or more fields are invalid"),
     RESOURCE_NOT_FOUND("RESOURCE_NOT_FOUND", "The requested resource was not found"),
@@ -24,11 +27,20 @@ public enum ApiErrorCode {
         this.defaultMessage = defaultMessage;
     }
 
+    @Override
+    public String getValue() {
+        return code;
+    }
+
     public String code() {
         return code;
     }
 
     public String defaultMessage() {
         return defaultMessage;
+    }
+
+    public static ApiErrorCode getApiErrorCode(String code) {
+        return StringValuedEnumSupport.fromValue(ApiErrorCode.class, code);
     }
 }

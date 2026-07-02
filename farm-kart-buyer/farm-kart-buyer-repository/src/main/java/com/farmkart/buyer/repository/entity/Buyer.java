@@ -1,5 +1,6 @@
 package com.farmkart.buyer.repository.entity;
 
+import com.farmkart.buyer.enums.BuyerStatusEnum;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -38,7 +39,7 @@ public class Buyer {
     private String buyerType = "INDIVIDUAL";
 
     @Column(name = "status", nullable = false)
-    private String status = "ACTIVE";
+    private String status = BuyerStatusEnum.ACTIVE.getValue();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

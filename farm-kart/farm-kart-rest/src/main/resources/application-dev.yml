@@ -1,36 +1,22 @@
-server:
-  port: 8080
-  servlet:
-    context-path: /farm-kart
-
 spring:
-  application:
-    name: farm-kart
+  config:
+    import: optional:classpath:config/application-dev-common.yml
   flyway:
     enabled: false
-  datasource:
-    url: ${MYSQL_DATASOURCE_URL:jdbc:mysql://localhost:3306/farmkart?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true}
-    username: ${MYSQL_DATASOURCE_USERNAME:farmkart}
-    password: ${MYSQL_DATASOURCE_PASSWORD:farmkart}
-  framework-datasource:
-    url: ${POSTGRES_DATASOURCE_URL:jdbc:postgresql://localhost:5432/farmkart_framework}
-    username: ${POSTGRES_DATASOURCE_USERNAME:farmkart}
-    password: ${POSTGRES_DATASOURCE_PASSWORD:farmkart}
+  jpa:
+    show-sql: false
   data:
     redis:
-      host: localhost
-      port: 6379
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
-# AWS credentials are resolved via the default chain:
-#   AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY env vars, or ~/.aws/credentials
 farmkart:
   s3:
-    region: ${AWS_REGION:ap-south-1}
     bucket: ${AWS_S3_BUCKET:farmkart-dev-uploads}
   kafka:
     consumer-group: farmkart-backend-dev
+  sms:
+    provider: console
 
 management:
   endpoints:

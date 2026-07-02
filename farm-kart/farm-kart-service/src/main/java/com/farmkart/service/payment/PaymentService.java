@@ -1,10 +1,14 @@
 package com.farmkart.service.payment;
 
+import com.farmkart.client.constants.MarketplaceServiceConstants;
 import com.farmkart.client.dto.payment.PaymentResponse;
 import com.farmkart.client.dto.payment.PaymentWebhookRequest;
+import com.farmkart.client.enums.PaymentGatewayStatusEnum;
 import com.farmkart.client.enums.PaymentRecordStatus;
 import com.farmkart.repository.PaymentRepository;
 import com.farmkart.repository.entity.Payment;
+import com.farmkart.starter.common.constants.FkCurrencyConstants;
+import com.farmkart.starter.common.enums.FkCurrencyEnum;
 import com.farmkart.starter.common.events.DomainEventPublisher;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
@@ -53,26 +57,32 @@ public class PaymentService {
             return;
         }
         if (payment.getStatus() == PaymentRecordStatus.SUCCESS) {
+            String currency = resolveCurrency(payment.getMetadata());
             PaymentSuccessEvent event = new PaymentSuccessEvent(
-                    new FkBaseEvent(FkTopics.PAYMENT_SUCCESS, "marketplace-service"),
+                    new FkBaseEvent(FkTopics.PAYMENT_SUCCESS, MarketplaceServiceConstants.SERVICE_NAME),
                     payment.getId(), payment.getOrderId(), null,
-                    payment.getAmount(), payment.getProviderPaymentId(), Instant.now());
+                    payment.getAmount(), currency, payment.getProviderPaymentId(), Instant.now());
             eventPublisher.publish(FkTopics.PAYMENT_SUCCESS, String.valueOf(payment.getId()), event);
         } else if (payment.getStatus() == PaymentRecordStatus.FAILED) {
+            String currency = resolveCurrency(payment.getMetadata());
             PaymentFailedEvent event = new PaymentFailedEvent(
-                    new FkBaseEvent(FkTopics.PAYMENT_FAILED, "marketplace-service"),
+                    new FkBaseEvent(FkTopics.PAYMENT_FAILED, MarketplaceServiceConstants.SERVICE_NAME),
                     payment.getId(), payment.getOrderId(), payment.getAmount(),
-                    rawStatus, Instant.now());
+                    currency, rawStatus, Instant.now());
             eventPublisher.publish(FkTopics.PAYMENT_FAILED, String.valueOf(payment.getId()), event);
         }
     }
 
     private PaymentRecordStatus mapStatus(String status) {
-        return switch (status.toUpperCase()) {
-            case "SUCCESS", "CAPTURED" -> PaymentRecordStatus.SUCCESS;
-            case "FAILED" -> PaymentRecordStatus.FAILED;
-            case "REFUNDED" -> PaymentRecordStatus.REFUNDED;
-            default -> PaymentRecordStatus.INITIATED;
+        PaymentGatewayStatusEnum gatewayStatus = PaymentGatewayStatusEnum.getPaymentGatewayStatusEnum(
+                status != null ? status.toUpperCase() : null);
+        if (gatewayStatus == null) {
+            return PaymentRecordStatus.INITIATED;
+        }
+        return switch (gatewayStatus) {
+            case SUCCESS, CAPTURED -> PaymentRecordStatus.SUCCESS;
+            case FAILED -> PaymentRecordStatus.FAILED;
+            case REFUNDED -> PaymentRecordStatus.REFUNDED;
         };
     }
 
@@ -84,5 +94,12 @@ public class PaymentService {
                 payment.getProviderPaymentId(),
                 payment.getAmount(),
                 payment.getStatus());
+    }
+
+    private String resolveCurrency(java.util.Map<String, Object> metadata) {
+        if (metadata == null || !metadata.containsKey("currency")) {
+            return FkCurrencyConstants.DEFAULT.getValue();
+        }
+        return FkCurrencyEnum.resolve(String.valueOf(metadata.get("currency"))).getValue();
     }
 }

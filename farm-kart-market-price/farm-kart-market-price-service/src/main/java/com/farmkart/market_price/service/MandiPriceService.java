@@ -1,5 +1,6 @@
 package com.farmkart.market_price.service;
 
+import com.farmkart.market_price.constants.MarketPriceServiceConstants;
 import com.farmkart.market_price.client.dto.MandiPriceResponse;
 import com.farmkart.market_price.repository.MandiPriceRepository;
 import com.farmkart.market_price.repository.entity.MandiPrice;
@@ -38,7 +39,7 @@ public class MandiPriceService {
     public MandiPriceResponse ingestPrice(MandiPrice price) {
         MandiPrice saved = priceRepo.save(price);
         eventPublisher.publish(FkTopics.PRICE_UPDATED, saved.getCropName(),
-                new FkBaseEvent(FkTopics.PRICE_UPDATED, "market-price-service"));
+                new FkBaseEvent(FkTopics.PRICE_UPDATED, MarketPriceServiceConstants.SERVICE_NAME));
         return toResponse(saved);
     }
 

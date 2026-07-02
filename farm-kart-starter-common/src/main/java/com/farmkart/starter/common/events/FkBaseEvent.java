@@ -16,4 +16,8 @@ public record FkBaseEvent(
     public FkBaseEvent(String eventType, String serviceOrigin) {
         this(UUID.randomUUID().toString(), eventType, serviceOrigin, Instant.now());
     }
+
+    public FkBaseEvent(String eventType, com.farmkart.starter.common.enums.FkServiceNameEnum serviceOrigin) {
+        this(UUID.randomUUID().toString(), eventType, serviceOrigin.getValue(), Instant.now());
+    }
 }

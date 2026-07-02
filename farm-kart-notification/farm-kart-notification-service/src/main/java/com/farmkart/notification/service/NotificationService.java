@@ -4,8 +4,12 @@ import com.farmkart.notification.client.dto.NotificationResponse;
 import com.farmkart.notification.client.dto.SendNotificationRequest;
 import com.farmkart.notification.client.enums.NotificationChannel;
 import com.farmkart.notification.client.enums.NotificationStatus;
+import com.farmkart.notification.client.enums.NotificationTemplateCodeEnum;
+import com.farmkart.notification.client.enums.NotificationTemplateVarEnum;
+import com.farmkart.notification.constants.NotificationServiceConstants;
 import com.farmkart.notification.repository.NotificationLogRepository;
 import com.farmkart.notification.repository.entity.NotificationLog;
+import com.farmkart.starter.common.enums.FkCurrencyEnum;
 import com.farmkart.starter.common.events.FkTopics;
 import com.farmkart.starter.common.events.NotificationTriggeredEvent;
 import com.farmkart.starter.common.sms.SmsGateway;
@@ -38,43 +42,40 @@ public class NotificationService {
         this.smsGateway = smsGateway;
     }
 
-    /**
-     * Domain-event-driven notification (Kafka consumer path).
-     */
     @Transactional
     public void sendDomainNotification(Long userId, NotificationChannel channel, String contact,
-                                       String templateCode, Map<String, String> templateVars) {
+                                       NotificationTemplateCodeEnum templateCode,
+                                       Map<String, String> templateVars) {
         log.info("Domain notification userId={} template={}", userId, templateCode);
-        NotificationLog entry = buildLog(userId, channel, contact, templateCode,
+        NotificationLog entry = buildLog(userId, channel, contact, templateCode.getValue(),
                 renderMessage(templateCode, templateVars, null));
         dispatch(entry);
         notifRepo.save(entry);
     }
 
-    /**
-     * Synchronous send (REST-triggered).
-     */
     @Transactional
     public NotificationResponse send(SendNotificationRequest req) {
+        NotificationTemplateCodeEnum template = NotificationTemplateCodeEnum
+                .getNotificationTemplateCodeEnum(req.templateCode());
         NotificationLog entry = buildLog(req.userId(), req.channel(), req.recipientContact(),
-                req.templateCode(), renderMessage(req.templateCode(), req.templateVars(), req.body()));
+                req.templateCode(), renderMessage(template, req.templateVars(), req.body()));
         dispatch(entry);
         return toResponse(notifRepo.save(entry));
     }
 
-    /**
-     * Kafka-triggered send — listens on notification.triggered topic.
-     */
-    @KafkaListener(topics = FkTopics.NOTIFICATION_TRIGGERED, groupId = "notification-service")
+    @KafkaListener(topics = FkTopics.NOTIFICATION_TRIGGERED, groupId = NotificationServiceConstants.KAFKA_GROUP_DISPATCH)
     public void onNotificationTriggered(NotificationTriggeredEvent event) {
         log.info("Notification triggered: userId={} channel={} template={}",
                 event.userId(), event.channel(), event.templateCode());
+        NotificationChannel channel = NotificationChannel.getNotificationChannel(event.channel());
+        NotificationTemplateCodeEnum template = NotificationTemplateCodeEnum
+                .getNotificationTemplateCodeEnum(event.templateCode());
         NotificationLog entry = buildLog(
                 event.userId(),
-                NotificationChannel.valueOf(event.channel()),
+                channel != null ? channel : NotificationChannel.SMS,
                 event.recipientContact(),
                 event.templateCode(),
-                renderMessage(event.templateCode(), event.templateVars(), null));
+                renderMessage(template, event.templateVars(), null));
         dispatch(entry);
         notifRepo.save(entry);
     }
@@ -89,8 +90,6 @@ public class NotificationService {
         return notifRepo.findByStatus(status, pageable).map(this::toResponse);
     }
 
-    // ── Private helpers ───────────────────────────────────────────────────
-
     private NotificationLog buildLog(Long userId, NotificationChannel channel,
                                       String contact, String templateCode, String rendered) {
         NotificationLog entry = new NotificationLog();
@@ -102,10 +101,6 @@ public class NotificationService {
         return entry;
     }
 
-    /**
-     * Dispatch to the appropriate channel gateway.
-     * Replace stubs with real SMS/email/push SDK calls in production.
-     */
     private void dispatch(NotificationLog entry) {
         try {
             switch (entry.getChannel()) {
@@ -123,37 +118,47 @@ public class NotificationService {
         }
     }
 
-    private String renderMessage(String templateCode, Map<String, String> vars, String fallbackBody) {
-        if (fallbackBody != null && !fallbackBody.isBlank()) return fallbackBody;
-        if ("OTP_LOGIN".equals(templateCode) && vars != null && vars.containsKey("otp")) {
-            return "Your Farm Kart OTP is " + vars.get("otp") + ". Valid for 5 minutes. Do not share.";
+    private String renderMessage(NotificationTemplateCodeEnum templateCode, Map<String, String> vars,
+                                 String fallbackBody) {
+        if (fallbackBody != null && !fallbackBody.isBlank()) {
+            return fallbackBody;
         }
-        if ("WELCOME".equals(templateCode)) {
-            return "Welcome to Farm Kart! Your account is ready.";
+        if (templateCode == null) {
+            return fallbackBody;
         }
-        if ("FARMER_WELCOME".equals(templateCode) && vars != null) {
-            return "Welcome to Farm Kart! Farm " + vars.getOrDefault("farmName", "") + " registered in "
-                    + vars.getOrDefault("state", "") + ".";
+        return switch (templateCode) {
+            case OTP_LOGIN -> vars != null && vars.containsKey(NotificationTemplateVarEnum.OTP.getValue())
+                    ? "Your Farm Kart OTP is " + vars.get(NotificationTemplateVarEnum.OTP.getValue())
+                    + ". Valid for 5 minutes. Do not share."
+                    : "[" + templateCode.getValue() + "]";
+            case WELCOME -> "Welcome to Farm Kart! Your account is ready.";
+            case FARMER_WELCOME -> "Welcome to Farm Kart! Farm "
+                    + varOrEmpty(vars, NotificationTemplateVarEnum.FARM_NAME) + " registered in "
+                    + varOrEmpty(vars, NotificationTemplateVarEnum.STATE) + ".";
+            case FARMER_VERIFIED -> "Your Farm Kart farmer profile has been verified. You can now list crops.";
+            case ORDER_CONFIRMED -> "Order #" + varOrEmpty(vars, NotificationTemplateVarEnum.ORDER_ID)
+                    + " confirmed. Total: " + formatMoney(vars, NotificationTemplateVarEnum.TOTAL) + ".";
+            case PAYMENT_RECEIPT -> "Payment received for order #"
+                    + varOrEmpty(vars, NotificationTemplateVarEnum.ORDER_ID) + ". Amount: "
+                    + formatMoney(vars, NotificationTemplateVarEnum.AMOUNT) + ".";
+            case ORDER_DELIVERED -> "Order #" + varOrEmpty(vars, NotificationTemplateVarEnum.ORDER_ID)
+                    + " delivered. Tracking: "
+                    + varOrEmpty(vars, NotificationTemplateVarEnum.TRACKING_NUMBER) + ".";
+        };
+    }
+
+    private String varOrEmpty(Map<String, String> vars, NotificationTemplateVarEnum key) {
+        if (vars == null) {
+            return "";
         }
-        if ("FARMER_VERIFIED".equals(templateCode)) {
-            return "Your Farm Kart farmer profile has been verified. You can now list crops.";
-        }
-        if ("ORDER_CONFIRMED".equals(templateCode) && vars != null) {
-            return "Order #" + vars.getOrDefault("orderId", "") + " confirmed. Total: INR "
-                    + vars.getOrDefault("total", "") + ".";
-        }
-        if ("PAYMENT_RECEIPT".equals(templateCode) && vars != null) {
-            return "Payment received for order #" + vars.getOrDefault("orderId", "") + ". Amount: INR "
-                    + vars.getOrDefault("amount", "") + ".";
-        }
-        if ("ORDER_DELIVERED".equals(templateCode) && vars != null) {
-            return "Order #" + vars.getOrDefault("orderId", "") + " delivered. Tracking: "
-                    + vars.getOrDefault("trackingNumber", "") + ".";
-        }
-        if (vars == null || vars.isEmpty()) return "[" + templateCode + "]";
-        StringBuilder sb = new StringBuilder("[" + templateCode + "] ");
-        vars.forEach((k, v) -> sb.append(k).append("=").append(v).append(" "));
-        return sb.toString();
+        return vars.getOrDefault(key.getValue(), "");
+    }
+
+    private String formatMoney(Map<String, String> vars, NotificationTemplateVarEnum amountKey) {
+        String amount = varOrEmpty(vars, amountKey);
+        String currencyCode = varOrEmpty(vars, NotificationTemplateVarEnum.CURRENCY);
+        FkCurrencyEnum currency = FkCurrencyEnum.resolve(currencyCode.isBlank() ? null : currencyCode);
+        return currency.formatAmount(amount);
     }
 
     private void sendSms(String phone, String message) {

@@ -1,0 +1,14 @@
+spring:
+  config:
+    import: optional:classpath:config/application-prod-common.yml
+  jpa:
+    show-sql: false
+  datasource:
+    hikari:
+      maximum-pool-size: 15
+  flyway:
+    validate-on-migrate: true
+    out-of-order: false
+  kafka:
+    consumer:
+      group-id: farmkart-admin-audit

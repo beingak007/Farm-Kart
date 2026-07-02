@@ -13,6 +13,7 @@ public record CreateOrderRequest(
         @NotNull Long buyerId,
         @NotNull Long vendorId,
         @NotBlank String shippingAddress,
+        String currency,
         @NotEmpty @Valid List<CartItemRequest> cartItems
 ) {
     public record CartItemRequest(

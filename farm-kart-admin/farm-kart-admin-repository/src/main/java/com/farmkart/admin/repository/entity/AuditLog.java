@@ -1,5 +1,6 @@
 package com.farmkart.admin.repository.entity;
 
+import com.farmkart.admin.client.enums.AuditOutcomeEnum;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -34,7 +35,7 @@ public class AuditLog {
     private String description;
 
     @Column(name = "outcome", nullable = false)
-    private String outcome = "SUCCESS";   // SUCCESS | FAILURE
+    private String outcome = AuditOutcomeEnum.SUCCESS.getValue();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

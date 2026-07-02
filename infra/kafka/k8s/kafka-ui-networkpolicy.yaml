@@ -1,0 +1,25 @@
+# Restrict Kafka UI pod egress to Kafka broker ports only.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-ui-egress
+  namespace: farmkart-kafka
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-ui
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 9092
+        - protocol: TCP
+          port: 9093
+        - protocol: TCP
+          port: 9094
+    - ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53

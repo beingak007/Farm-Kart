@@ -1,5 +1,6 @@
 package com.farmkart.repository.entity;
 
+import com.farmkart.client.enums.SheetUploadStatusEnum;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -32,7 +33,7 @@ public class SheetUpload {
     private Integer rowCount;
 
     @Column(nullable = false)
-    private String status = "QUEUED";
+    private String status = SheetUploadStatusEnum.QUEUED.getValue();
 
     /** Legacy local path — kept for backward compat, may be null for new uploads */
     @Column(name = "storage_path")

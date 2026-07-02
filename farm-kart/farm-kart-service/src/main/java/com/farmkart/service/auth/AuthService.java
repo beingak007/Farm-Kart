@@ -8,6 +8,7 @@ import com.farmkart.repository.UserRepository;
 import com.farmkart.service.security.JwtUtil;
 import com.farmkart.client.enums.UserRole;
 import com.farmkart.client.enums.AuthProvider;
+import com.farmkart.client.constants.MarketplaceServiceConstants;
 import com.farmkart.starter.common.events.DomainEventPublisher;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
@@ -81,7 +82,7 @@ public class AuthService {
         userRepository.save(user);
 
         UserRegisteredEvent event = new UserRegisteredEvent(
-                new FkBaseEvent(FkTopics.USER_REGISTERED, "marketplace-service"),
+                new FkBaseEvent(FkTopics.USER_REGISTERED, MarketplaceServiceConstants.SERVICE_NAME),
                 user.getId(), user.getEmail(), user.getMobile(),
                 user.getRole().name(), Instant.now());
         eventPublisher.publish(FkTopics.USER_REGISTERED, String.valueOf(user.getId()), event);

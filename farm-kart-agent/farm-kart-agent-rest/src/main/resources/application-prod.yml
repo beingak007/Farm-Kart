@@ -1,0 +1,30 @@
+spring:
+  config:
+    import: optional:classpath:config/application-prod-common.yml
+  jpa:
+    show-sql: false
+  datasource:
+    hikari:
+      maximum-pool-size: 10
+  flyway:
+    validate-on-migrate: true
+    out-of-order: false
+  kafka:
+    consumer:
+      group-id: farmkart-agent
+
+farmkart:
+  agent:
+    llm:
+      openai:
+        api-key: ${OPENAI_API_KEY}
+        model: ${OPENAI_MODEL:gpt-4o}
+  services:
+    farmer-url: ${FARMER_URL}
+    buyer-url: ${BUYER_URL}
+    logistics-url: ${LOGISTICS_URL}
+    warehouse-url: ${WAREHOUSE_URL}
+    market-price-url: ${MARKET_PRICE_URL}
+    catalog-url: ${CATALOG_URL}
+    ai-advisory-url: ${AI_ADVISORY_URL}
+    reporting-url: ${REPORTING_URL}

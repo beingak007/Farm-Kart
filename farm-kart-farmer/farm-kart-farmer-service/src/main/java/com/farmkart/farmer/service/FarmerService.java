@@ -1,5 +1,6 @@
 package com.farmkart.farmer.service;
 
+import com.farmkart.farmer.constants.FarmerServiceConstants;
 import com.farmkart.farmer.client.dto.FarmerOnboardRequest;
 import com.farmkart.farmer.client.dto.FarmerResponse;
 import com.farmkart.farmer.client.dto.FarmUpdateRequest;
@@ -51,7 +52,7 @@ public class FarmerService {
         farmer = farmerRepo.save(farmer);
 
         FarmerCreatedEvent event = new FarmerCreatedEvent(
-                new FkBaseEvent(FkTopics.FARMER_CREATED, "farmer-service"),
+                new FkBaseEvent(FkTopics.FARMER_CREATED, FarmerServiceConstants.SERVICE_NAME),
                 farmer.getId(), farmer.getUserId(), farmer.getFarmName(),
                 farmer.getState(), farmer.getDistrict(), Instant.now());
         eventPublisher.publish(FkTopics.FARMER_CREATED, String.valueOf(farmer.getId()), event);
@@ -109,7 +110,7 @@ public class FarmerService {
         farmer.setStatus(FarmerStatus.VERIFIED);
         farmer = farmerRepo.save(farmer);
         eventPublisher.publish(FkTopics.FARMER_VERIFIED, String.valueOf(farmerId),
-                new FkBaseEvent(FkTopics.FARMER_VERIFIED, "farmer-service"));
+                new FkBaseEvent(FkTopics.FARMER_VERIFIED, FarmerServiceConstants.SERVICE_NAME));
         return toResponse(farmer);
     }
 

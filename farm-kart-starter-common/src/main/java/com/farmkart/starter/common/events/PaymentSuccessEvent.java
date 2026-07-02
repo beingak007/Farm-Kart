@@ -9,6 +9,7 @@ public record PaymentSuccessEvent(
         Long orderId,
         Long userId,
         BigDecimal amount,
+        String currency,
         String gatewayTransactionId,
         Instant paidAt
 ) {}

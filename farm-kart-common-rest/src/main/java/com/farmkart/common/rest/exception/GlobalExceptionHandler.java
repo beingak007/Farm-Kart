@@ -6,6 +6,7 @@ import com.farmkart.starter.common.dto.ApiErrorCode;
 import com.farmkart.starter.common.dto.ApiResponse;
 import com.farmkart.starter.common.dto.FieldErrorDetail;
 import com.farmkart.starter.common.dto.ResponseMeta;
+import com.farmkart.starter.common.enums.FieldValidationCodeEnum;
 import com.farmkart.starter.common.exception.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -59,7 +60,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse<Void>> handleMissingParam(MissingServletRequestParameterException ex) {
-        FieldErrorDetail detail = new FieldErrorDetail(ex.getParameterName(), "Required parameter is missing", "REQUIRED");
+        FieldErrorDetail detail = new FieldErrorDetail(ex.getParameterName(), "Required parameter is missing",
+                FieldValidationCodeEnum.REQUIRED.getValue());
         ApiError error = ApiError.of(
                 ApiErrorCode.VALIDATION_FAILED,
                 ApiErrorCode.VALIDATION_FAILED.defaultMessage(),
@@ -72,7 +74,7 @@ public class GlobalExceptionHandler {
         FieldErrorDetail detail = new FieldErrorDetail(
                 ex.getName(),
                 "Invalid value for parameter",
-                "INVALID");
+                FieldValidationCodeEnum.INVALID.getValue());
         ApiError error = ApiError.of(
                 ApiErrorCode.VALIDATION_FAILED,
                 ApiErrorCode.VALIDATION_FAILED.defaultMessage(),
@@ -136,6 +138,6 @@ public class GlobalExceptionHandler {
         return new FieldErrorDetail(
                 fieldError.getField(),
                 fieldError.getDefaultMessage() != null ? fieldError.getDefaultMessage() : "Invalid value",
-                "INVALID");
+                FieldValidationCodeEnum.INVALID.getValue());
     }
 }

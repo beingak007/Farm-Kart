@@ -1,5 +1,6 @@
 package com.farmkart.buyer.service;
 
+import com.farmkart.buyer.constants.BuyerServiceConstants;
 import com.farmkart.buyer.client.dto.BuyerOnboardRequest;
 import com.farmkart.buyer.client.dto.BuyerResponse;
 import com.farmkart.buyer.repository.BuyerRepository;
@@ -42,7 +43,7 @@ public class BuyerService {
         buyer = buyerRepo.save(buyer);
 
         BuyerCreatedEvent event = new BuyerCreatedEvent(
-                new FkBaseEvent(FkTopics.BUYER_CREATED, "buyer-service"),
+                new FkBaseEvent(FkTopics.BUYER_CREATED, BuyerServiceConstants.SERVICE_NAME),
                 buyer.getId(), buyer.getUserId(), buyer.getDisplayName(),
                 buyer.getState(), Instant.now());
         eventPublisher.publish(FkTopics.BUYER_CREATED, String.valueOf(buyer.getId()), event);

@@ -7,6 +7,8 @@ import com.farmkart.warehouse.repository.WarehouseRepository;
 import com.farmkart.warehouse.repository.entity.Warehouse;
 import com.farmkart.warehouse.repository.entity.WarehouseBooking;
 import com.farmkart.starter.common.events.DomainEventPublisher;
+import com.farmkart.warehouse.constants.WarehouseServiceConstants;
+import com.farmkart.warehouse.enums.WarehouseStatusEnum;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
 import com.farmkart.starter.common.exception.BusinessException;
@@ -38,7 +40,7 @@ public class WarehouseService {
 
     @Transactional(readOnly = true)
     public Page<WarehouseResponse> listByState(String state, Pageable pageable) {
-        return warehouseRepo.findByStateAndStatus(state, "ACTIVE", pageable).map(this::toResponse);
+        return warehouseRepo.findByStateAndStatus(state, WarehouseStatusEnum.ACTIVE.getValue(), pageable).map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
@@ -72,7 +74,7 @@ public class WarehouseService {
         booking = bookingRepo.save(booking);
 
         eventPublisher.publish(FkTopics.WAREHOUSE_BOOKED, String.valueOf(booking.getId()),
-                new FkBaseEvent(FkTopics.WAREHOUSE_BOOKED, "warehouse-service"));
+                new FkBaseEvent(FkTopics.WAREHOUSE_BOOKED, WarehouseServiceConstants.SERVICE_NAME));
         return booking.getId();
     }
 

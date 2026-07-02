@@ -4,6 +4,8 @@ import com.farmkart.logistics.client.dto.CreateShipmentRequest;
 import com.farmkart.logistics.client.dto.ShipmentResponse;
 import com.farmkart.logistics.repository.ShipmentRepository;
 import com.farmkart.logistics.repository.entity.Shipment;
+import com.farmkart.logistics.constants.LogisticsServiceConstants;
+import com.farmkart.logistics.enums.ShipmentStatusEnum;
 import com.farmkart.starter.common.events.DomainEventPublisher;
 import com.farmkart.starter.common.events.FkBaseEvent;
 import com.farmkart.starter.common.events.FkTopics;
@@ -44,7 +46,7 @@ public class ShipmentService {
         s = shipmentRepo.save(s);
 
         ShipmentCreatedEvent event = new ShipmentCreatedEvent(
-                new FkBaseEvent(FkTopics.SHIPMENT_CREATED, "logistics-service"),
+                new FkBaseEvent(FkTopics.SHIPMENT_CREATED, LogisticsServiceConstants.SERVICE_NAME),
                 s.getId(), s.getOrderId(), s.getLogisticsPartnerId(),
                 s.getTrackingNumber(), s.getPickupAddress(), s.getDeliveryAddress(),
                 s.getExpectedDelivery());
@@ -72,12 +74,17 @@ public class ShipmentService {
     public ShipmentResponse updateStatus(Long shipmentId, String newStatus) {
         Shipment s = shipmentRepo.findById(shipmentId)
                 .orElseThrow(() -> new BusinessException(404, "Shipment not found: " + shipmentId));
-        s.setStatus(newStatus);
-        if ("DELIVERED".equals(newStatus)) {
+        ShipmentStatusEnum status = ShipmentStatusEnum.getShipmentStatusEnum(newStatus);
+        if (status != null) {
+            s.setStatus(status.getValue());
+        } else {
+            s.setStatus(newStatus);
+        }
+        if (ShipmentStatusEnum.DELIVERED == status) {
             Instant deliveredAt = Instant.now();
             s.setActualDelivery(deliveredAt);
             ShipmentDeliveredEvent event = new ShipmentDeliveredEvent(
-                    new FkBaseEvent(FkTopics.SHIPMENT_DELIVERED, "logistics-service"),
+                    new FkBaseEvent(FkTopics.SHIPMENT_DELIVERED, LogisticsServiceConstants.SERVICE_NAME),
                     s.getId(), s.getOrderId(), s.getTrackingNumber(), deliveredAt);
             eventPublisher.publish(FkTopics.SHIPMENT_DELIVERED, String.valueOf(shipmentId), event);
         }
