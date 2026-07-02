@@ -26,11 +26,6 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
-      skip_sonar:
-        description: "Skip SonarCloud analysis"
-        required: false
-        default: "false"
-        type: boolean
       skip_owasp:
         description: "Skip OWASP security scan"
         required: false
@@ -111,15 +106,6 @@ jobs:
             echo "status=failed" >> $GITHUB_OUTPUT
           fi
 
-      - name: Upload JaCoCo XML reports
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: jacoco-xml
-          path: "**/target/site/jacoco/jacoco.xml"
-          retention-days: 14
-          if-no-files-found: warn
-
       - name: Upload JaCoCo HTML reports
         uses: actions/upload-artifact@v4
         if: always()
@@ -151,68 +137,9 @@ jobs:
   # Job 2 — SonarCloud Analysis
   # Runs after tests so JaCoCo coverage is available
   # ──────────────────────────────────────────────────────────
-  sonar-analysis:
-    name: SonarCloud Analysis
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    needs: build-and-test
-    if: |
-      github.event.inputs.skip_sonar != 'true' && (
-        github.event_name == 'push' ||
-        github.event_name == 'workflow_dispatch' ||
-        (github.event_name == 'pull_request' &&
-         github.event.pull_request.head.repo.full_name == github.repository)
-      )
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Download JaCoCo XML reports
-        uses: actions/download-artifact@v4
-        with:
-          name: jacoco-xml
-        continue-on-error: true   # no tests = no coverage data (still OK)
-
-      - name: Run SonarCloud Analysis
-        run: |
-          mvn sonar:sonar \
-            --batch-mode \
-            --no-transfer-progress \
-            -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.organization=${{ github.repository_owner }} \
-            -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        continue-on-error: true   # Missing SONAR_TOKEN shouldn't block merge
-
   # ──────────────────────────────────────────────────────────
-  # Job 3 — Code Quality (Checkstyle + SpotBugs + PMD)
+  # Job 2 — Code Quality (Checkstyle + SpotBugs + PMD)
+  # NOTE: SonarCloud removed — will be added in a future phase
   # ──────────────────────────────────────────────────────────
   code-quality:
     name: Code Quality Gate
@@ -366,7 +293,7 @@ jobs:
           if-no-files-found: warn
 
   # ──────────────────────────────────────────────────────────
-  # Job 6 — CI Status Summary (always runs, visible on PR)
+  # Job 5 — CI Status Summary (always runs, visible on PR)
   # ──────────────────────────────────────────────────────────
   ci-status:
     name: "CI Status Summary"
@@ -375,7 +302,6 @@ jobs:
     if: always()
     needs:
       - build-and-test
-      - sonar-analysis
       - code-quality
 
     steps:
@@ -385,9 +311,10 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| Build & Test     | ${{ needs.build-and-test.result == 'success' && '✅ Passed' || needs.build-and-test.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| SonarCloud       | ${{ needs.sonar-analysis.result == 'success' && '✅ Passed' || needs.sonar-analysis.result == 'skipped' && '⏭️ Skipped' || '⚠️ Check logs' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Code Quality     | ${{ needs.code-quality.result == 'success' && '✅ Passed' || needs.code-quality.result == 'skipped' && '⏭️ Skipped' || '⚠️ Check logs' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build & Test  | ${{ needs.build-and-test.result == 'success' && '✅ Passed' || needs.build-and-test.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Quality  | ${{ needs.code-quality.result == 'success' && '✅ Passed' || needs.code-quality.result == 'skipped' && '⏭️ Skipped' || '⚠️ Check logs' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| OWASP Scan    | main push only |" >> $GITHUB_STEP_SUMMARY
+          echo "| SonarCloud    | ⏸️ Planned — next phase |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
