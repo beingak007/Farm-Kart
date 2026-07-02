@@ -144,6 +144,18 @@ public class NotificationService {
             case ORDER_DELIVERED -> "Order #" + varOrEmpty(vars, NotificationTemplateVarEnum.ORDER_ID)
                     + " delivered. Tracking: "
                     + varOrEmpty(vars, NotificationTemplateVarEnum.TRACKING_NUMBER) + ".";
+            case WAREHOUSE_BOOKED -> "Warehouse confirmed! "
+                    + varOrEmpty(vars, NotificationTemplateVarEnum.WAREHOUSE_NAME)
+                    + " (" + varOrEmpty(vars, NotificationTemplateVarEnum.DISTANCE_KM) + " km away). Rent "
+                    + formatMoney(vars, NotificationTemplateVarEnum.RENT)
+                    + " for " + varOrEmpty(vars, NotificationTemplateVarEnum.QUANTITY_TONS) + "t ("
+                    + varOrEmpty(vars, NotificationTemplateVarEnum.START_DATE) + " to "
+                    + varOrEmpty(vars, NotificationTemplateVarEnum.END_DATE) + "). Booking #"
+                    + varOrEmpty(vars, NotificationTemplateVarEnum.BOOKING_ID) + ".";
+            case WAREHOUSE_LIVE_LOCATION -> "Live location: "
+                    + varOrEmpty(vars, NotificationTemplateVarEnum.WAREHOUSE_NAME)
+                    + " — open map: " + varOrEmpty(vars, NotificationTemplateVarEnum.MAPS_URL)
+                    + " (Booking #" + varOrEmpty(vars, NotificationTemplateVarEnum.BOOKING_ID) + ").";
         };
     }
 

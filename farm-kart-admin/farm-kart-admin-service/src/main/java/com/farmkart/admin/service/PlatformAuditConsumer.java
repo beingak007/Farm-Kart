@@ -71,6 +71,15 @@ public class PlatformAuditConsumer {
                         + FkCurrencyEnum.resolve(event.currency()).formatAmount(event.amount()));
     }
 
+    @KafkaListener(topics = FkTopics.WAREHOUSE_BOOKED, groupId = AdminServiceConstants.KAFKA_GROUP_AUDIT)
+    public void onWarehouseBooked(WarehouseBookedEvent event) {
+        handle(event.base(), FkTopics.WAREHOUSE_BOOKED, event.farmerId(), "WarehouseBooking",
+                String.valueOf(event.bookingId()),
+                "Warehouse " + event.warehouseName() + " booked — "
+                        + FkCurrencyEnum.resolve(event.currency()).formatAmount(event.totalRent())
+                        + (event.distanceKm() != null ? " (" + event.distanceKm() + " km)" : ""));
+    }
+
     @KafkaListener(topics = FkTopics.SHIPMENT_CREATED, groupId = AdminServiceConstants.KAFKA_GROUP_AUDIT)
     public void onShipmentCreated(ShipmentCreatedEvent event) {
         handle(event.base(), FkTopics.SHIPMENT_CREATED, null, "Shipment", String.valueOf(event.shipmentId()),

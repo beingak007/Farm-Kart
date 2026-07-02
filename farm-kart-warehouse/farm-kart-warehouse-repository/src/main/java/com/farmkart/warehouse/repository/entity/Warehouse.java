@@ -43,6 +43,15 @@ public class Warehouse {
     @Column(name = "owner_id")
     private Long ownerId;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
+    @Column(name = "price_per_ton_per_day", nullable = false)
+    private java.math.BigDecimal pricePerTonPerDay = new java.math.BigDecimal("5.00");
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -68,5 +77,11 @@ public class Warehouse {
     public void setStatus(String status) { this.status = status; }
     public Long getOwnerId() { return ownerId; }
     public void setOwnerId(Long ownerId) { this.ownerId = ownerId; }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public java.math.BigDecimal getPricePerTonPerDay() { return pricePerTonPerDay; }
+    public void setPricePerTonPerDay(java.math.BigDecimal pricePerTonPerDay) { this.pricePerTonPerDay = pricePerTonPerDay; }
     public Instant getCreatedAt() { return createdAt; }
 }

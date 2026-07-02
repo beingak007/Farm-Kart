@@ -39,6 +39,15 @@ public class WarehouseBooking {
     @Column(name = "status", nullable = false)
     private String status = "CONFIRMED";
 
+    @Column(name = "distance_km")
+    private Double distanceKm;
+
+    @Column(name = "pickup_latitude")
+    private Double pickupLatitude;
+
+    @Column(name = "pickup_longitude")
+    private Double pickupLongitude;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -60,5 +69,11 @@ public class WarehouseBooking {
     public void setTotalCost(BigDecimal totalCost) { this.totalCost = totalCost; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public Double getDistanceKm() { return distanceKm; }
+    public void setDistanceKm(Double distanceKm) { this.distanceKm = distanceKm; }
+    public Double getPickupLatitude() { return pickupLatitude; }
+    public void setPickupLatitude(Double pickupLatitude) { this.pickupLatitude = pickupLatitude; }
+    public Double getPickupLongitude() { return pickupLongitude; }
+    public void setPickupLongitude(Double pickupLongitude) { this.pickupLongitude = pickupLongitude; }
     public Instant getCreatedAt() { return createdAt; }
 }

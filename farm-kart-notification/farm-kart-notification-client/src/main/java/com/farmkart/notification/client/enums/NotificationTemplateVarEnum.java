@@ -13,7 +13,18 @@ public enum NotificationTemplateVarEnum implements StringValuedEnum {
     TOTAL("total"),
     AMOUNT("amount"),
     CURRENCY("currency"),
-    TRACKING_NUMBER("trackingNumber");
+    TRACKING_NUMBER("trackingNumber"),
+    WAREHOUSE_NAME("warehouseName"),
+    WAREHOUSE_ADDRESS("warehouseAddress"),
+    DISTANCE_KM("distanceKm"),
+    RENT("rent"),
+    QUANTITY_TONS("quantityTons"),
+    START_DATE("startDate"),
+    END_DATE("endDate"),
+    BOOKING_ID("bookingId"),
+    MAPS_URL("mapsUrl"),
+    LATITUDE("latitude"),
+    LONGITUDE("longitude");
 
     private final String value;
 

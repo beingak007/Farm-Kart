@@ -47,6 +47,7 @@ public final class FkTopics {
     // ── Warehouse ─────────────────────────────────────────────────────────
     public static final String WAREHOUSE_BOOKED     = "farmkart.warehouse.booked";
     public static final String WAREHOUSE_RELEASED   = "farmkart.warehouse.released";
+    public static final String WAREHOUSE_LIVE_LOCATION = "farmkart.warehouse.live.location";
 
     // ── Market Price ──────────────────────────────────────────────────────
     public static final String PRICE_UPDATED        = "farmkart.market.price.updated";

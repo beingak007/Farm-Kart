@@ -101,4 +101,50 @@ public class DomainNotificationConsumer {
                                 NotificationTemplateVarEnum.ORDER_ID.getValue(), String.valueOf(event.orderId()),
                                 NotificationTemplateVarEnum.TRACKING_NUMBER.getValue(), event.trackingNumber())));
     }
+
+    @KafkaListener(topics = FkTopics.WAREHOUSE_BOOKED, groupId = NotificationServiceConstants.KAFKA_GROUP_DOMAIN)
+    public void onWarehouseBooked(WarehouseBookedEvent event) {
+        eventGuard.runOnce(event.base().eventId(), FkTopics.WAREHOUSE_BOOKED, () -> {
+            NotificationChannel channel = event.farmerContact() != null && !event.farmerContact().isBlank()
+                    ? NotificationChannel.SMS
+                    : NotificationChannel.PUSH;
+            notificationService.sendDomainNotification(
+                    event.farmerId(),
+                    channel,
+                    event.farmerContact(),
+                    NotificationTemplateCodeEnum.WAREHOUSE_BOOKED,
+                    Map.of(
+                            NotificationTemplateVarEnum.BOOKING_ID.getValue(), String.valueOf(event.bookingId()),
+                            NotificationTemplateVarEnum.WAREHOUSE_NAME.getValue(), event.warehouseName(),
+                            NotificationTemplateVarEnum.WAREHOUSE_ADDRESS.getValue(),
+                            event.warehouseAddress() != null ? event.warehouseAddress() : "",
+                            NotificationTemplateVarEnum.DISTANCE_KM.getValue(),
+                            event.distanceKm() != null ? String.valueOf(event.distanceKm()) : "",
+                            NotificationTemplateVarEnum.RENT.getValue(), event.totalRent().toPlainString(),
+                            NotificationTemplateVarEnum.CURRENCY.getValue(), event.currency(),
+                            NotificationTemplateVarEnum.QUANTITY_TONS.getValue(), String.valueOf(event.quantityTons()),
+                            NotificationTemplateVarEnum.START_DATE.getValue(), String.valueOf(event.startDate()),
+                                NotificationTemplateVarEnum.END_DATE.getValue(), String.valueOf(event.endDate())));
+        });
+    }
+
+    @KafkaListener(topics = FkTopics.WAREHOUSE_LIVE_LOCATION, groupId = NotificationServiceConstants.KAFKA_GROUP_DOMAIN)
+    public void onWarehouseLiveLocation(WarehouseLiveLocationEvent event) {
+        eventGuard.runOnce(event.base().eventId(), FkTopics.WAREHOUSE_LIVE_LOCATION, () -> {
+            NotificationChannel channel = event.farmerContact() != null && !event.farmerContact().isBlank()
+                    ? NotificationChannel.SMS
+                    : NotificationChannel.PUSH;
+            notificationService.sendDomainNotification(
+                    event.farmerId(),
+                    channel,
+                    event.farmerContact(),
+                    NotificationTemplateCodeEnum.WAREHOUSE_LIVE_LOCATION,
+                    Map.of(
+                            NotificationTemplateVarEnum.BOOKING_ID.getValue(), String.valueOf(event.bookingId()),
+                            NotificationTemplateVarEnum.WAREHOUSE_NAME.getValue(), event.warehouseName(),
+                            NotificationTemplateVarEnum.MAPS_URL.getValue(), event.mapsUrl(),
+                            NotificationTemplateVarEnum.LATITUDE.getValue(), String.valueOf(event.latitude()),
+                            NotificationTemplateVarEnum.LONGITUDE.getValue(), String.valueOf(event.longitude())));
+        });
+    }
 }

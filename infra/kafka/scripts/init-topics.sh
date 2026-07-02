@@ -29,6 +29,7 @@ TOPICS=(
   farmkart.shipment.delivered
   farmkart.warehouse.booked
   farmkart.warehouse.released
+  farmkart.warehouse.live.location
   farmkart.market.price.updated
   farmkart.sheet.uploaded
   farmkart.media.uploaded

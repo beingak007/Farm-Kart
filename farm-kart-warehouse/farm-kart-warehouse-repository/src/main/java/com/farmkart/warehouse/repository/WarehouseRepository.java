@@ -15,4 +15,7 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, Long> {
 
     @Query("SELECT w FROM Warehouse w WHERE w.state = :state AND w.availableCapacityTons >= :needed AND w.status = 'ACTIVE'")
     List<Warehouse> findAvailableInState(@Param("state") String state, @Param("needed") double needed);
+
+    @Query("SELECT w FROM Warehouse w WHERE w.status = :status AND w.availableCapacityTons >= :needed")
+    List<Warehouse> findAvailableWithCapacity(@Param("status") String status, @Param("needed") double needed);
 }
