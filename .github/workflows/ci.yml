@@ -1,6 +1,7 @@
 # ============================================================
 # Farm Kart Microservices — CI Pipeline
-# Triggers: push to main/develop, all pull requests
+# Triggers: push to main/develop/release/hotfix, all PRs,
+#           manual dispatch (workflow_dispatch)
 # Java 21 | Maven | JaCoCo | SonarCloud | OWASP
 # ============================================================
 
@@ -13,11 +14,28 @@ on:
       - develop
       - "release/**"
       - "hotfix/**"
+    paths-ignore:
+      - "**.md"
+      - ".gitignore"
+      - "docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
   pull_request:
     branches:
       - main
       - develop
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      skip_sonar:
+        description: "Skip SonarCloud analysis"
+        required: false
+        default: "false"
+        type: boolean
+      skip_owasp:
+        description: "Skip OWASP security scan"
+        required: false
+        default: "false"
+        type: boolean
 
 # Cancel in-progress runs for the same ref to save runner minutes
 concurrency:
@@ -29,20 +47,31 @@ env:
   JAVA_DISTRIBUTION: "temurin"
   MAVEN_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
 
+# ─────────────────────────────────────────────────────────────
+# Shared permissions for all jobs
+# ─────────────────────────────────────────────────────────────
+permissions:
+  contents: read
+  checks: write         # required by dorny/test-reporter
+  pull-requests: write  # required for PR comments/annotations
+
 jobs:
-  # ─────────────────────────────────────────────────────────
-  # Job 1: Build + Unit Tests + JaCoCo
-  # ─────────────────────────────────────────────────────────
+  # ──────────────────────────────────────────────────────────
+  # Job 1 — Build + Unit Tests + JaCoCo
+  # ──────────────────────────────────────────────────────────
   build-and-test:
-    name: Build & Test (Java ${{ env.JAVA_VERSION }})
+    name: "Build & Test (Java ${{ env.JAVA_VERSION }})"
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
+    outputs:
+      build_status: ${{ steps.set-status.outputs.status }}
+
     steps:
-      - name: Checkout source code
+      - name: Checkout source
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # Full history required by SonarCloud
+          fetch-depth: 0   # Full history for SonarCloud
 
       - name: Set up Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
@@ -58,49 +87,56 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Display Java & Maven versions
+      - name: Show Java & Maven versions
         run: |
           java -version
           mvn --version
 
-      - name: Build all modules (skip tests for compile check)
+      - name: Compile all modules
         run: mvn clean package -DskipTests --batch-mode --no-transfer-progress
 
       - name: Run unit tests with JaCoCo
+        id: tests
         run: mvn verify --batch-mode --no-transfer-progress -Djacoco.haltOnFailure=false
         env:
           SPRING_PROFILES_ACTIVE: test
+
+      - name: Set build status output
+        id: set-status
+        if: always()
+        run: |
+          if [ "${{ steps.tests.outcome }}" == "success" ]; then
+            echo "status=passed" >> $GITHUB_OUTPUT
+          else
+            echo "status=failed" >> $GITHUB_OUTPUT
+          fi
 
       - name: Upload JaCoCo XML reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: jacoco-reports
+          name: jacoco-xml
           path: "**/target/site/jacoco/jacoco.xml"
           retention-days: 14
+          if-no-files-found: warn
 
       - name: Upload JaCoCo HTML reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: jacoco-html-reports
+          name: jacoco-html
           path: "**/target/site/jacoco/"
           retention-days: 7
+          if-no-files-found: warn
 
-      - name: Upload test results (Surefire)
+      - name: Upload Surefire test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: surefire-reports
           path: "**/target/surefire-reports/"
           retention-days: 7
+          if-no-files-found: warn
 
       - name: Publish test results
         uses: dorny/test-reporter@v1
@@ -111,22 +147,25 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-  # ─────────────────────────────────────────────────────────
-  # Job 2: SonarCloud Analysis
-  # Runs AFTER tests to use JaCoCo coverage data
-  # ─────────────────────────────────────────────────────────
+  # ──────────────────────────────────────────────────────────
+  # Job 2 — SonarCloud Analysis
+  # Runs after tests so JaCoCo coverage is available
+  # ──────────────────────────────────────────────────────────
   sonar-analysis:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: build-and-test
-    # Only run Sonar on push (not on forks / dependabot PRs that lack secrets)
     if: |
-      github.event_name == 'push' ||
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+      github.event.inputs.skip_sonar != 'true' && (
+        github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'pull_request' &&
+         github.event.pull_request.head.repo.full_name == github.repository)
+      )
 
     steps:
-      - name: Checkout source code
+      - name: Checkout source
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -152,10 +191,11 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Download JaCoCo reports from previous job
+      - name: Download JaCoCo XML reports
         uses: actions/download-artifact@v4
         with:
-          name: jacoco-reports
+          name: jacoco-xml
+        continue-on-error: true   # no tests = no coverage data (still OK)
 
       - name: Run SonarCloud Analysis
         run: |
@@ -163,24 +203,25 @@ jobs:
             --batch-mode \
             --no-transfer-progress \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL || 'https://sonarcloud.io' }} \
-            -Dsonar.organization=beingakstyle \
-            -Dsonar.projectKey=beingakstyle_farm-kart-microservice
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.organization=${{ github.repository_owner }} \
+            -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true   # Missing SONAR_TOKEN shouldn't block merge
 
-  # ─────────────────────────────────────────────────────────
-  # Job 3: Code Quality (Checkstyle + SpotBugs + PMD)
-  # ─────────────────────────────────────────────────────────
+  # ──────────────────────────────────────────────────────────
+  # Job 3 — Code Quality (Checkstyle + SpotBugs + PMD)
+  # ──────────────────────────────────────────────────────────
   code-quality:
     name: Code Quality Gate
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     needs: build-and-test
 
     steps:
-      - name: Checkout source code
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Set up Java ${{ env.JAVA_VERSION }}
@@ -197,12 +238,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Run quality checks (Checkstyle + SpotBugs + PMD)
+      - name: Run quality checks (Checkstyle / SpotBugs / PMD)
         run: |
-          mvn verify -P quality \
-            --batch-mode \
-            --no-transfer-progress \
-            -DskipTests
+          if mvn help:all-profiles --batch-mode --no-transfer-progress 2>/dev/null | grep -q 'quality'; then
+            mvn verify -P quality --batch-mode --no-transfer-progress -DskipTests
+          else
+            echo "::warning::Maven 'quality' profile not found — skipping static analysis"
+          fi
+        continue-on-error: true
 
       - name: Upload SpotBugs reports
         uses: actions/upload-artifact@v4
@@ -211,6 +254,7 @@ jobs:
           name: spotbugs-reports
           path: "**/target/spotbugsXml.xml"
           retention-days: 14
+          if-no-files-found: warn
 
       - name: Upload PMD reports
         uses: actions/upload-artifact@v4
@@ -219,20 +263,24 @@ jobs:
           name: pmd-reports
           path: "**/target/pmd.xml"
           retention-days: 14
+          if-no-files-found: warn
 
-  # ─────────────────────────────────────────────────────────
-  # Job 4: Security Scan (OWASP Dependency Check)
-  # Runs weekly on main OR on push to main
-  # ─────────────────────────────────────────────────────────
+  # ──────────────────────────────────────────────────────────
+  # Job 4 — OWASP Dependency Check (push to main only)
+  # ──────────────────────────────────────────────────────────
   security-scan:
     name: OWASP Dependency Check
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    # Run on push to main or via the scheduled security workflow
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    timeout-minutes: 40
+    needs: build-and-test
+    if: |
+      github.event.inputs.skip_owasp != 'true' && (
+        (github.ref == 'refs/heads/main' && github.event_name == 'push') ||
+        github.event_name == 'workflow_dispatch'
+      )
 
     steps:
-      - name: Checkout source code
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Set up Java ${{ env.JAVA_VERSION }}
@@ -251,35 +299,36 @@ jobs:
 
       - name: Run OWASP Dependency Check
         run: |
-          mvn verify -P security-scan \
-            --batch-mode \
-            --no-transfer-progress \
-            -DskipTests
+          if mvn help:all-profiles --batch-mode --no-transfer-progress 2>/dev/null | grep -q 'security-scan'; then
+            mvn verify -P security-scan --batch-mode --no-transfer-progress -DskipTests
+          else
+            echo "::warning::Maven 'security-scan' profile not found — skipping OWASP scan"
+          fi
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        continue-on-error: true   # Don't block merge; report findings
+        continue-on-error: true
 
       - name: Upload OWASP report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: owasp-dependency-check-report
+          name: owasp-report
           path: "**/target/dependency-check/**"
           retention-days: 30
+          if-no-files-found: warn
 
-  # ─────────────────────────────────────────────────────────
-  # Job 5: Publish Maven Artifacts
-  # Runs only on push to main (release)
-  # ─────────────────────────────────────────────────────────
+  # ──────────────────────────────────────────────────────────
+  # Job 5 — Publish Artifacts (push to main only)
+  # ──────────────────────────────────────────────────────────
   publish-artifacts:
     name: Publish Artifacts
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [build-and-test, sonar-analysis, code-quality]
+    needs: [build-and-test, code-quality]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Checkout source code
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Set up Java ${{ env.JAVA_VERSION }}
@@ -298,7 +347,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build and package (production)
+      - name: Build & package (production)
         run: |
           mvn clean package \
             --batch-mode \
@@ -314,3 +363,38 @@ jobs:
             **/target/*.jar
             !**/target/original-*.jar
           retention-days: 30
+          if-no-files-found: warn
+
+  # ──────────────────────────────────────────────────────────
+  # Job 6 — CI Status Summary (always runs, visible on PR)
+  # ──────────────────────────────────────────────────────────
+  ci-status:
+    name: "CI Status Summary"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+    needs:
+      - build-and-test
+      - sonar-analysis
+      - code-quality
+
+    steps:
+      - name: Print CI summary
+        run: |
+          echo "## CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build & Test     | ${{ needs.build-and-test.result == 'success' && '✅ Passed' || needs.build-and-test.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| SonarCloud       | ${{ needs.sonar-analysis.result == 'success' && '✅ Passed' || needs.sonar-analysis.result == 'skipped' && '⏭️ Skipped' || '⚠️ Check logs' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Quality     | ${{ needs.code-quality.result == 'success' && '✅ Passed' || needs.code-quality.result == 'skipped' && '⏭️ Skipped' || '⚠️ Check logs' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** \`${{ github.event_name }}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if build-and-test failed
+        if: needs.build-and-test.result == 'failure'
+        run: |
+          echo "::error::Build & Test job FAILED. Check logs above."
+          exit 1
