@@ -61,6 +61,8 @@ farmkart:
     secret: ${JWT_SECRET:change-me-in-production-use-at-least-256-bits-secret-key-here}
     access-token-expiry-minutes: 15
     refresh-token-expiry-days: 7
+  security:
+    enabled: true
   otp:
     ttl-minutes: 5
     max-send-requests: 3

@@ -430,11 +430,93 @@ SPRING_PROFILES_ACTIVE=prod docker compose up farm-kart-app
 
 ---
 
+## Master Admin
+
+The **Master Admin** role holds super-admin privileges and bypasses all role-based API restrictions across every microservice.
+
+### Role hierarchy
+
+| Role | Scope |
+|---|---|
+| `MASTER_ADMIN` | Full access to every API — no restrictions |
+| `VENDOR` | Products, orders, vendors, warehouses |
+| `DISTRIBUTOR` | Shipments, warehouses, catalog |
+| `RESELLER` | Vendor + order + shipment paths |
+| `BUYER` | Buyers, orders, catalog, market prices |
+| `SELLER` | Farmers, vendors, warehouses, advisory |
+| `CUSTOMER` | Buyer-facing paths (catalog, orders) |
+
+### How the bypass works
+
+```
+Bearer JWT
+  → JwtAuthenticationFilter  (parses role from token)
+  → FkRoleAuthorizationManager
+       │
+       ├─ MASTER_ADMIN? → ALLOW immediately (all 7 acceptance criteria met)
+       ├─ Public path?  → ALLOW (/api/v1/auth/*, /api/v1/currencies, Swagger)
+       └─ Else          → check FkApiRoleRegistry (path → allowed roles)
+```
+
+### Register a Master Admin
+
+```http
+POST /farm-kart/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "name": "Platform Admin",
+  "email": "admin@farmkart.com",
+  "mobile": "9999999999",
+  "password": "strongPassword@123",
+  "role": "MASTER_ADMIN"
+}
+```
+
+### Use the Master Admin token
+
+The token returned works on **every** microservice and every endpoint:
+
+```http
+Authorization: Bearer <master_admin_token>
+
+# Vendor API
+GET /farm-kart/api/v1/vendors
+
+# Buyer API (different service on :8082)
+GET /buyer-service/api/v1/buyers/1
+
+# Warehouse booking
+POST /warehouse-service/api/v1/warehouses/smart-book
+
+# Admin audit logs
+GET /admin-service/api/v1/admin/audit-logs
+
+# Farmer onboard
+POST /farmer-service/api/v1/farmers/onboard
+```
+
+### Implementation files
+
+| Component | Module / path |
+|---|---|
+| `FkUserRoleEnum` (7 roles + MASTER_ADMIN bypass flag) | `farm-kart-starter-common/.../enums/` |
+| `FkApiRoleRegistry` (path → allowed roles map) | `farm-kart-starter-common/.../security/` |
+| `FkRoleAuthorizationManager` (Master Admin bypass logic) | `farm-kart-common-rest/.../security/` |
+| `JwtAuthenticationFilter` (JWT → `FkUserPrincipal`) | `farm-kart-common-rest/.../security/` |
+| `FkSecurityAutoConfiguration` (shared `SecurityFilterChain`) | `farm-kart-common-rest/.../security/` |
+| `FkSecurityAutoConfiguration.imports` (auto-loads on all services) | `farm-kart-common-rest/resources/META-INF/spring/` |
+
+> **Note:** All microservices must share the same `JWT_SECRET` environment variable so the Master Admin token is accepted by every service.
+
+---
+
 ## Security
 
 - JWT Authentication (HS512, configurable expiry)
 - OAuth2 Social Login (Google)
-- Role-Based Access Control (FARMER / BUYER / LOGISTICS_PARTNER / WAREHOUSE_PARTNER / REGIONAL_ADMIN / MASTER_ADMIN)
+- Role-Based Access Control — 7 roles (`MASTER_ADMIN`, `VENDOR`, `DISTRIBUTOR`, `RESELLER`, `BUYER`, `SELLER`, `CUSTOMER`)
+- Master Admin bypasses all role restrictions (see [Master Admin](#master-admin) section)
 - OTP-based phone verification
 - Audit logging via Admin Service (REST + **Kafka event consumer**)
 - **Safe API errors** — internal exceptions logged server-side only; clients receive structured `ApiError` codes

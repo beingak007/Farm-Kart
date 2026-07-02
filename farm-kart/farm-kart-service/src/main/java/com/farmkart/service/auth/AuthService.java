@@ -190,7 +190,7 @@ public class AuthService {
     }
 
     private AuthTokenResponse issueTokens(User user) {
-        String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getRole().name());
+        String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getRole().toFkRole().name());
         String refreshTokenValue = jwtUtil.generateRefreshTokenValue();
 
         refreshTokenRepository.deleteByUserId(user.getId());
