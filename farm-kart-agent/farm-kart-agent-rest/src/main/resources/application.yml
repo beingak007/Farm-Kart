@@ -50,12 +50,13 @@ farmkart:
         api-key: ${OPENAI_API_KEY:}
         model: ${OPENAI_MODEL:gpt-4o-mini}
         max-tokens: 2048
+  # All domain APIs now live in the single Farm Kart app (port 8080)
   services:
-    farmer-url:      ${FARMER_URL:http://localhost:8081/farmer-service}
-    buyer-url:       ${BUYER_URL:http://localhost:8082/buyer-service}
-    logistics-url:   ${LOGISTICS_URL:http://localhost:8083/logistics-service}
-    warehouse-url:   ${WAREHOUSE_URL:http://localhost:8084/warehouse-service}
-    market-price-url: ${MARKET_PRICE_URL:http://localhost:8085/market-price-service}
-    catalog-url:     ${CATALOG_URL:http://localhost:8088/catalog-service}
-    ai-advisory-url: ${AI_ADVISORY_URL:http://localhost:8090/ai-advisory-service}
-    reporting-url:   ${REPORTING_URL:http://localhost:8089/reporting-service}
+    farmer-url:      ${FARMKART_APP_URL:http://localhost:8080/farm-kart}
+    buyer-url:       ${FARMKART_APP_URL:http://localhost:8080/farm-kart}
+    logistics-url:   ${FARMKART_APP_URL:http://localhost:8080/farm-kart}
+    warehouse-url:   ${FARMKART_APP_URL:http://localhost:8080/farm-kart}
+    market-price-url: ${FARMKART_APP_URL:http://localhost:8080/farm-kart}
+    catalog-url:     ${FARMKART_APP_URL:http://localhost:8080/farm-kart}
+    ai-advisory-url: ${FARMKART_APP_URL:http://localhost:8080/farm-kart}
+    reporting-url:   ${FARMKART_APP_URL:http://localhost:8080/farm-kart}

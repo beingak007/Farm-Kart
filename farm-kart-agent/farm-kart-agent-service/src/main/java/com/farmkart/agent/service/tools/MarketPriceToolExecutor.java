@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class MarketPriceToolExecutor {
 
-    @Value("${farmkart.services.market-price-url:http://localhost:8085/market-price-service}")
+    @Value("${farmkart.services.market-price-url:http://localhost:8080/farm-kart}")
     private String marketPriceUrl;
 
     private final RestTemplate rest   = new RestTemplate();

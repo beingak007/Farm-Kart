@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class AdvisoryToolExecutor {
 
-    @Value("${farmkart.services.ai-advisory-url:http://localhost:8090/ai-advisory-service}")
+    @Value("${farmkart.services.ai-advisory-url:http://localhost:8080/farm-kart}")
     private String advisoryUrl;
 
     private final RestTemplate rest   = new RestTemplate();

@@ -20,11 +20,11 @@ farmkart:
         api-key: ${OPENAI_API_KEY}
         model: ${OPENAI_MODEL:gpt-4o}
   services:
-    farmer-url: ${FARMER_URL}
-    buyer-url: ${BUYER_URL}
-    logistics-url: ${LOGISTICS_URL}
-    warehouse-url: ${WAREHOUSE_URL}
-    market-price-url: ${MARKET_PRICE_URL}
-    catalog-url: ${CATALOG_URL}
-    ai-advisory-url: ${AI_ADVISORY_URL}
-    reporting-url: ${REPORTING_URL}
+    farmer-url: ${FARMKART_APP_URL}
+    buyer-url: ${FARMKART_APP_URL}
+    logistics-url: ${FARMKART_APP_URL}
+    warehouse-url: ${FARMKART_APP_URL}
+    market-price-url: ${FARMKART_APP_URL}
+    catalog-url: ${FARMKART_APP_URL}
+    ai-advisory-url: ${FARMKART_APP_URL}
+    reporting-url: ${FARMKART_APP_URL}

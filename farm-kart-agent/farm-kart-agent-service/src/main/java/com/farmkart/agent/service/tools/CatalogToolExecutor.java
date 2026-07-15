@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class CatalogToolExecutor {
 
-    @Value("${farmkart.services.catalog-url:http://localhost:8088/catalog-service}")
+    @Value("${farmkart.services.catalog-url:http://localhost:8080/farm-kart}")
     private String catalogUrl;
 
     private final RestTemplate rest   = new RestTemplate();

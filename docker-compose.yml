@@ -74,6 +74,10 @@ services:
       POSTGRES_DATASOURCE_URL: jdbc:postgresql://postgres:5432/farmkart_framework
       POSTGRES_DATASOURCE_USERNAME: farmkart
       POSTGRES_DATASOURCE_PASSWORD: farmkart
+      WAREHOUSE_APP_DB_URL: jdbc:postgresql://postgres:5432/farmkart_warehouse_app
+      WAREHOUSE_APP_DB_USER: farmkart
+      WAREHOUSE_APP_DB_PASS: farmkart
+      ELASTICSEARCH_HOST: http://elasticsearch:9200
       REDIS_HOST: redis
     depends_on:
       mysql:

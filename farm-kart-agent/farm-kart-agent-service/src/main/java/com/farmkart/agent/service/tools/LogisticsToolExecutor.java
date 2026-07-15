@@ -9,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class LogisticsToolExecutor {
 
-    @Value("${farmkart.services.logistics-url:http://localhost:8083/logistics-service}")
+    @Value("${farmkart.services.logistics-url:http://localhost:8080/farm-kart}")
     private String logisticsUrl;
 
     private final RestTemplate rest   = new RestTemplate();

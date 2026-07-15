@@ -1,11 +1,10 @@
 spring:
   config:
     import: optional:classpath:config/application-prod-common.yml
+  # Migrations run via the explicit Flyway beans (marketplace + merged domains + framework
+  # + warehouse-app); Boot's auto Flyway stays off so it doesn't re-scan db/migration/**.
   flyway:
-    enabled: true
-    baseline-on-migrate: true
-    validate-on-migrate: true
-    out-of-order: false
+    enabled: false
   datasource:
     hikari:
       maximum-pool-size: 20

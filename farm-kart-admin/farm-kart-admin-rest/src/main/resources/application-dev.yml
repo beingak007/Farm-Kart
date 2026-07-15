@@ -1,8 +1,0 @@
-spring:
-  config:
-    import: optional:classpath:config/application-dev-common.yml
-  jpa:
-    show-sql: true
-  kafka:
-    consumer:
-      group-id: farmkart-admin-audit-dev

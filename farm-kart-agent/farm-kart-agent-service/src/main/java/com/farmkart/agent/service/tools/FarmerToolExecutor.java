@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class FarmerToolExecutor {
 
-    @Value("${farmkart.services.farmer-url:http://localhost:8081/farmer-service}")
+    @Value("${farmkart.services.farmer-url:http://localhost:8080/farm-kart}")
     private String farmerUrl;
 
     private final RestTemplate rest = new RestTemplate();

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# Farm Kart — multi-service local startup
-# Starts every microservice in its own screen session.
+# Farm Kart — local startup
+# Starts the merged Farm Kart app, notification service, agent service and UI,
+# each in its own screen session.
 # Prerequisites: Java 17+, Maven 3.9+, MySQL running
 # Kafka: run ./scripts/kafka-infra.sh start  (or external broker on :9092)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -58,62 +59,19 @@ if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
 fi
 
 # ── Service port map ──────────────────────────────────────────────────────────
-#   marketplace     :8080  (farm-kart — existing core service)
-#   farmer          :8081
-#   buyer           :8082
-#   logistics       :8083
-#   warehouse       :8084
-#   market-price    :8085
-#   admin           :8086
+#   farm-kart app   :8080  (marketplace + farmer + buyer + logistics + warehouse
+#                           + market-price + admin + catalog + reporting + ai-advisory)
 #   notification    :8087
-#   product-catalog :8088
-#   reporting       :8089
-#   ai-advisory     :8090
+#   agent           :8091
 
 # ── Start services (profile: ${SPRING_PROFILE}) ───────────────────────────────
-start_service "fk-marketplace" \
+start_service "fk-app" \
     "$ROOT/farm-kart/farm-kart-rest/target/farm-kart-rest-*.jar" \
-    "${PROFILE_OPTS}"
-
-start_service "fk-farmer" \
-    "$ROOT/farm-kart-farmer/farm-kart-farmer-rest/target/farm-kart-farmer-rest-*.jar" \
-    "${PROFILE_OPTS} -DFARMER_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_farmer?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DFARMER_DB_USER=$DB_USER -DFARMER_DB_PASS=$DB_PASS"
-
-start_service "fk-buyer" \
-    "$ROOT/farm-kart-buyer/farm-kart-buyer-rest/target/farm-kart-buyer-rest-*.jar" \
-    "${PROFILE_OPTS} -DBUYER_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_buyer?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DBUYER_DB_USER=$DB_USER -DBUYER_DB_PASS=$DB_PASS"
-
-start_service "fk-logistics" \
-    "$ROOT/farm-kart-logistics/farm-kart-logistics-rest/target/farm-kart-logistics-rest-*.jar" \
-    "${PROFILE_OPTS} -DLOGISTICS_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_logistics?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DLOGISTICS_DB_USER=$DB_USER -DLOGISTICS_DB_PASS=$DB_PASS"
-
-start_service "fk-warehouse" \
-    "$ROOT/farm-kart-warehouse/farm-kart-warehouse-rest/target/farm-kart-warehouse-rest-*.jar" \
-    "${PROFILE_OPTS} -DWAREHOUSE_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_warehouse?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DWAREHOUSE_DB_USER=$DB_USER -DWAREHOUSE_DB_PASS=$DB_PASS"
-
-start_service "fk-market-price" \
-    "$ROOT/farm-kart-market-price/farm-kart-market-price-rest/target/farm-kart-market-price-rest-*.jar" \
-    "${PROFILE_OPTS} -DMARKET_PRICE_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_market_price?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DMARKET_PRICE_DB_USER=$DB_USER -DMARKET_PRICE_DB_PASS=$DB_PASS"
-
-start_service "fk-admin" \
-    "$ROOT/farm-kart-admin/farm-kart-admin-rest/target/farm-kart-admin-rest-*.jar" \
-    "${PROFILE_OPTS} -DADMIN_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_admin?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DADMIN_DB_USER=$DB_USER -DADMIN_DB_PASS=$DB_PASS"
+    "${PROFILE_OPTS} -DMYSQL_DATASOURCE_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DMYSQL_DATASOURCE_USERNAME=$DB_USER -DMYSQL_DATASOURCE_PASSWORD=$DB_PASS"
 
 start_service "fk-notification" \
     "$ROOT/farm-kart-notification/farm-kart-notification-rest/target/farm-kart-notification-rest-*.jar" \
     "${PROFILE_OPTS} -DNOTIF_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_notification?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DNOTIF_DB_USER=$DB_USER -DNOTIF_DB_PASS=$DB_PASS"
-
-start_service "fk-catalog" \
-    "$ROOT/farm-kart-product-catalog/farm-kart-product-catalog-rest/target/farm-kart-product-catalog-rest-*.jar" \
-    "${PROFILE_OPTS} -DCATALOG_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_product_catalog?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DCATALOG_DB_USER=$DB_USER -DCATALOG_DB_PASS=$DB_PASS"
-
-start_service "fk-reporting" \
-    "$ROOT/farm-kart-reporting/farm-kart-reporting-rest/target/farm-kart-reporting-rest-*.jar" \
-    "${PROFILE_OPTS} -DREPORTING_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_reporting?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DREPORTING_DB_USER=$DB_USER -DREPORTING_DB_PASS=$DB_PASS"
-
-start_service "fk-ai-advisory" \
-    "$ROOT/farm-kart-ai-advisory/farm-kart-ai-advisory-rest/target/farm-kart-ai-advisory-rest-*.jar" \
-    "${PROFILE_OPTS} -DAI_ADVISORY_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_ai_advisory?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DAI_ADVISORY_DB_USER=$DB_USER -DAI_ADVISORY_DB_PASS=$DB_PASS"
 
 start_service "fk-agent" \
     "$ROOT/farm-kart-agent/farm-kart-agent-rest/target/farm-kart-agent-rest-*.jar" \
@@ -132,17 +90,8 @@ echo "✓ All services started (spring.profiles.active=${SPRING_PROFILE}). Attac
 echo ""
 echo "  Session          URL"
 echo "  ─────────────    ──────────────────────────────────────────"
-echo "  fk-marketplace   http://localhost:8080/swagger-ui.html"
-echo "  fk-farmer        http://localhost:8081/farmer-service/swagger-ui.html"
-echo "  fk-buyer         http://localhost:8082/buyer-service/swagger-ui.html"
-echo "  fk-logistics     http://localhost:8083/logistics-service/swagger-ui.html"
-echo "  fk-warehouse     http://localhost:8084/warehouse-service/swagger-ui.html"
-echo "  fk-market-price  http://localhost:8085/market-price-service/swagger-ui.html"
-echo "  fk-admin         http://localhost:8086/admin-service/swagger-ui.html"
+echo "  fk-app           http://localhost:8080/farm-kart/swagger-ui.html"
 echo "  fk-notification  http://localhost:8087/notification-service/swagger-ui.html"
-echo "  fk-catalog       http://localhost:8088/catalog-service/swagger-ui.html"
-echo "  fk-reporting     http://localhost:8089/reporting-service/swagger-ui.html"
-echo "  fk-ai-advisory   http://localhost:8090/ai-advisory-service/swagger-ui.html"
 echo "  fk-agent         http://localhost:8091/agent-service/swagger-ui.html"
 echo "  fk-ui            http://localhost:5173"
 echo "  fk-kafka-ui      http://localhost:8099  (Provectus Kafka UI)"
