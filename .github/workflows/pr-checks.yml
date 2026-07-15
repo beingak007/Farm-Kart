@@ -1,0 +1,232 @@
+# ============================================================
+# Orchestrator — PR Checks & Branch CI
+#
+# THE single entry point for code verification. Fires on:
+#   - every PR targeting develop/main
+#   - every push to develop/main/release/hotfix
+#
+# It fans out to the reusable workflows (build/test/sonar/
+# security/dependency-check/docker) IN PARALLEL, then:
+#   - `quality-gate` aggregates every result into ONE required
+#     status check ("Quality Gate") for branch protection
+#   - `pr-comment` posts ✅/❌ summary on the PR
+#   - `notify` (reusable) emails + Slacks + Teams on failure
+#
+# Branch protection (scripts/setup-branch-protection.sh) marks
+# "Quality Gate" as a REQUIRED check → a red pipeline physically
+# blocks the merge button.
+# ============================================================
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches:
+      - main
+      - develop
+      - "release/**"
+      - "hotfix/**"
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".gitignore"
+      - ".github/ISSUE_TEMPLATE/**"
+  workflow_dispatch:
+
+# Cancel superseded runs of the same PR/branch — saves runner minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  security-events: write
+  packages: write
+
+jobs:
+  # ── Stage 1: everything below runs IN PARALLEL ────────────
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+    with:
+      upload-artifacts: true
+
+  test:
+    name: Test & Static Analysis
+    uses: ./.github/workflows/test.yml
+    with:
+      run-quality-profile: true
+
+  security:
+    name: Security
+    uses: ./.github/workflows/security.yml
+    secrets: inherit
+    with:
+      # CodeQL is slow; skip it for draft PRs to keep feedback fast.
+      run-codeql: ${{ github.event.pull_request.draft != true }}
+
+  dependency-check:
+    name: OWASP
+    uses: ./.github/workflows/dependency-check.yml
+    secrets: inherit
+
+  # ── Stage 2: needs compiled/tested code ───────────────────
+  sonar:
+    name: Sonar
+    needs: [test]
+    uses: ./.github/workflows/sonar.yml
+    secrets: inherit
+
+  docker:
+    name: Docker
+    needs: [build]
+    uses: ./.github/workflows/docker.yml
+    secrets: inherit
+    with:
+      # Build-only on PRs; push images on branch builds.
+      push: ${{ github.event_name != 'pull_request' }}
+
+  # ──────────────────────────────────────────────────────────
+  # Quality Gate — THE required status check for branch
+  # protection. Fails if ANY upstream job failed.
+  # ──────────────────────────────────────────────────────────
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+    needs: [build, test, security, dependency-check, sonar, docker]
+    outputs:
+      failed-jobs: ${{ steps.gate.outputs.failed }}
+      result: ${{ steps.gate.outputs.result }}
+
+    steps:
+      - name: Evaluate all check results
+        id: gate
+        run: |
+          declare -A results=(
+            ["Build"]="${{ needs.build.result }}"
+            ["Unit & Integration Tests / Static Analysis"]="${{ needs.test.result }}"
+            ["Security Scans"]="${{ needs.security.result }}"
+            ["OWASP Dependency Check"]="${{ needs.dependency-check.result }}"
+            ["Sonar Quality Gate"]="${{ needs.sonar.result }}"
+            ["Docker Build"]="${{ needs.docker.result }}"
+          )
+
+          failed=""
+          {
+            echo "## Quality Gate Results"
+            echo ""
+            echo "| Check | Status |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          for check in "${!results[@]}"; do
+            r="${results[$check]}"
+            case "$r" in
+              success)  icon="✅ Passed"  ;;
+              skipped)  icon="⏭️ Skipped" ;;
+              *)        icon="❌ Failed"; failed="${failed:+$failed, }$check" ;;
+            esac
+            echo "| $check | $icon |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+          echo "failed=$failed" >> "$GITHUB_OUTPUT"
+          if [ -n "$failed" ]; then
+            echo "result=failure" >> "$GITHUB_OUTPUT"
+            echo "::error::Quality gate FAILED — $failed"
+            exit 1
+          fi
+          echo "result=success" >> "$GITHUB_OUTPUT"
+          echo "All quality gates passed ✅"
+
+  # ──────────────────────────────────────────────────────────
+  # PR comment — ✅/❌ summary posted (and updated in place)
+  # on every run.
+  # ──────────────────────────────────────────────────────────
+  pr-comment:
+    name: PR Comment
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always() && github.event_name == 'pull_request'
+    needs: [quality-gate]
+
+    steps:
+      - name: Post / update PR status comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const gate = "${{ needs.quality-gate.result }}";
+            const failed = "${{ needs.quality-gate.outputs.failed-jobs }}";
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const marker = "<!-- farm-kart-ci-status -->";
+
+            let body;
+            if (gate === "success") {
+              body = [
+                marker,
+                "## ✅ All quality gates passed.",
+                "",
+                "Ready for review.",
+                "",
+                `[View pipeline run](${runUrl})`,
+              ].join("\n");
+            } else {
+              const reasons = failed
+                ? failed.split(",").map(f => `* ${f.trim()} failed`).join("\n")
+                : "* See pipeline logs";
+              body = [
+                marker,
+                "## ❌ Build Failed",
+                "",
+                "Reason:",
+                "",
+                reasons,
+                "",
+                "Please fix the issues and push again.",
+                "",
+                `[View pipeline logs](${runUrl})`,
+              ].join("\n");
+            }
+
+            // Update the existing status comment instead of spamming new ones.
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  # ──────────────────────────────────────────────────────────
+  # Failure notifications (email + Slack + Teams)
+  # ──────────────────────────────────────────────────────────
+  notify:
+    name: Notify
+    if: always() && needs.quality-gate.result == 'failure'
+    needs: [quality-gate]
+    uses: ./.github/workflows/notify.yml
+    secrets: inherit
+    with:
+      status: failure
+      failed-jobs: ${{ needs.quality-gate.outputs.failed-jobs }}
+      pr-number: ${{ format('{0}', github.event.pull_request.number || '') }}

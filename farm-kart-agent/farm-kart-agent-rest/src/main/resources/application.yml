@@ -36,6 +36,16 @@ spring:
       group-id: agent-service
       auto-offset-reset: earliest
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
 springdoc:
   api-docs:
     path: /v3/api-docs

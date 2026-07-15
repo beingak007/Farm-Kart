@@ -1,0 +1,73 @@
+# ============================================================
+# Reusable Workflow — OWASP Dependency Check
+#
+# Responsibilities:
+#   - Scan every Maven dependency against the NVD CVE database
+#   - FAIL the pipeline when any dependency has CVSS >= 7
+#     (threshold set in the root pom: <failBuildOnCVSS>7</failBuildOnCVSS>)
+#   - False positives are suppressed via owasp-suppressions.xml
+#
+# Secrets:
+#   NVD_API_KEY — free API key from https://nvd.nist.gov/developers
+#                 (without it the NVD download is heavily throttled
+#                  and the scan can take 30+ minutes)
+# ============================================================
+name: Dependency Check
+
+on:
+  workflow_call:
+    inputs:
+      fail-on-cvss:
+        description: "Fail the build on CVSS >= this score"
+        type: string
+        required: false
+        default: "7"
+    secrets:
+      NVD_API_KEY:
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  MAVEN_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
+
+jobs:
+  owasp:
+    name: OWASP Dependency Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+
+      # The NVD database download (~500 MB) is the slow part.
+      # Caching it cuts scan time from ~30 min to ~5 min.
+      - name: Cache OWASP NVD database
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: owasp-nvd-${{ runner.os }}-${{ github.run_number }}
+          restore-keys: owasp-nvd-${{ runner.os }}-
+
+      - name: Run OWASP Dependency Check (security-scan profile)
+        run: >
+          mvn verify -P security-scan
+          --batch-mode --no-transfer-progress
+          -DskipTests
+          -DfailBuildOnCVSS=${{ inputs.fail-on-cvss }}
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+
+      - name: Upload OWASP reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owasp-reports-${{ github.sha }}
+          path: "**/target/dependency-check/**"
+          retention-days: 30
+          if-no-files-found: warn

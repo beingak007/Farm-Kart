@@ -1,0 +1,53 @@
+# ============================================================
+# Rollback — manual, any environment
+#
+# _deploy.yml already auto-rolls-back when the health check
+# fails right after a deploy. This workflow covers the OTHER
+# case: a bad release discovered later (hours/days after a
+# "green" deploy). Dispatch it with the environment + the last
+# known-good tag.
+#
+# Rollback = deploying an older immutable sha-tag, so it simply
+# reuses _deploy.yml (including health verification and
+# notifications) instead of duplicating deployment logic.
+# ============================================================
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to roll back"
+        required: true
+        type: choice
+        options: [dev, qa, stage, production]
+      image-tag:
+        description: "Known-good image tag to restore (e.g. sha-<full-sha>)"
+        required: true
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  rollback:
+    name: "Rollback ${{ github.event.inputs.environment }}"
+    uses: ./.github/workflows/_deploy.yml
+    secrets: inherit
+    with:
+      environment: ${{ github.event.inputs.environment }}
+      image-tag: ${{ github.event.inputs.image-tag }}
+
+  notify:
+    name: Notify team
+    needs: [rollback]
+    if: always()
+    uses: ./.github/workflows/notify.yml
+    secrets: inherit
+    with:
+      # Rollbacks are always announced, success or failure.
+      status: failure
+      failed-jobs: >-
+        ROLLBACK of ${{ github.event.inputs.environment }} to
+        ${{ github.event.inputs.image-tag }} —
+        result: ${{ needs.rollback.result }}

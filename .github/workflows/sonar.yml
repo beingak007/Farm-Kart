@@ -1,0 +1,88 @@
+# ============================================================
+# Reusable Workflow — SonarCloud Analysis + Quality Gate
+#
+# Responsibilities:
+#   - Full SonarCloud scan (bugs, vulnerabilities, code smells,
+#     duplication) with JaCoCo coverage attached
+#   - BLOCK the pipeline until the Quality Gate passes
+#     (-Dsonar.qualitygate.wait=true polls the gate result and
+#      fails the Maven build if the gate is red)
+#
+# Quality Gate conditions are configured in SonarCloud
+# (Project → Quality Gate). Required gate for this repo:
+#   - Coverage            >= 80%
+#   - Bugs                == 0   (Reliability rating A)
+#   - Vulnerabilities     == 0   (Security rating A)
+#   - Security Hotspots reviewed == 100%
+#
+# Secrets:
+#   SONAR_TOKEN — SonarCloud token (User → Security → Tokens)
+#
+# NOTE: The job degrades gracefully — if SONAR_TOKEN is not
+# configured yet, the scan is skipped with a warning instead of
+# failing every PR of a fork/new setup.
+# ============================================================
+name: Sonar
+
+on:
+  workflow_call:
+    secrets:
+      SONAR_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+  pull-requests: read   # Sonar decorates PRs via its own GitHub app
+
+env:
+  MAVEN_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
+
+jobs:
+  sonar:
+    name: SonarCloud Scan + Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout source (full history)
+        uses: actions/checkout@v4
+        with:
+          # Sonar needs full history + blame data to attribute new
+          # code to the right author and compute "new code" metrics.
+          fetch-depth: 0
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+
+      # Sonar's incremental analysis cache — speeds up repeat scans.
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Check Sonar token availability
+        id: sonar-check
+        run: |
+          if [ -n "${{ secrets.SONAR_TOKEN }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::SONAR_TOKEN secret not configured — SonarCloud scan skipped"
+          fi
+
+      # verify (not package) so JaCoCo XML reports exist before the
+      # sonar goal reads them (sonar.coverage.jacoco.xmlReportPaths
+      # is configured in the root pom.xml).
+      - name: Run SonarCloud analysis (waits for Quality Gate)
+        if: steps.sonar-check.outputs.enabled == 'true'
+        run: >
+          mvn verify sonar:sonar
+          --batch-mode --no-transfer-progress
+          -Dsonar.qualitygate.wait=true
+          -Dsonar.qualitygate.timeout=600
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # PR decoration
+          SPRING_PROFILES_ACTIVE: test

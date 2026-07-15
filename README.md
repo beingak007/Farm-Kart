@@ -326,6 +326,22 @@ Flyway settings (all services): `baseline-on-migrate`, `out-of-order`, `validate
 
 ---
 
+## CI/CD
+
+The full enterprise pipeline (PR quality gates, SonarCloud, security scans,
+Docker builds, dev/qa/stage/prod deployments with manual production approval,
+auto-rollback and Email/Slack/Teams notifications) is documented in
+**[docs/CICD.md](docs/CICD.md)**.
+
+Quick facts:
+
+- One required status check — **`Quality Gate`** (`.github/workflows/pr-checks.yml`) — aggregates build, tests, Checkstyle/PMD/SpotBugs, SonarCloud gate, Gitleaks, CodeQL, license compliance, OWASP and Docker builds. A red pipeline blocks the merge.
+- Branch protection for `main`/`develop` (2 approvals, code owners, up-to-date branch, no force push): `./scripts/setup-branch-protection.sh`
+- Images: `ghcr.io/<owner>/<repo>/{farm-kart-app, farm-kart-notification, farm-kart-agent}` tagged `sha-<sha>` (immutable), branch names and `latest`.
+- Deployments: `deploy-dev` (auto from `develop`), `deploy-qa` (manual), `deploy-stage` (auto from `main`), `deploy-prod` (manual + required reviewers + typed confirmation), `rollback` (manual, any env).
+
+---
+
 ## Local Development
 
 ### Prerequisites

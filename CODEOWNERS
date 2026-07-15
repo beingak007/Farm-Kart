@@ -60,3 +60,30 @@
 # -------------------------------------------------------
 /docker/                            @beingakstyle
 /scripts/                           @beingakstyle
+
+# -------------------------------------------------------
+# Role-based ownership — reviewers auto-assigned per folder.
+# Last matching rule wins, so these override the module rules
+# above for the matched sub-paths.
+#
+# NOTE: GitHub teams (e.g. @farmkart/backend-team) require an
+# organisation. Until the org + teams exist, @beingakstyle is
+# the effective owner; swap in the team slugs once created.
+# -------------------------------------------------------
+
+# Backend production code → Backend Team
+**/src/main/java/                   @beingakstyle
+# **/src/main/java/                 @farmkart/backend-team
+
+# Tests → QA Team
+**/src/test/java/                   @beingakstyle
+# **/src/test/java/                 @farmkart/qa-team
+
+# Database migrations (Flyway SQL / CQL) → DBA Team
+**/db/migration/                    @beingakstyle
+**/cassandra/migration/             @beingakstyle
+# **/db/migration/                  @farmkart/dba-team
+
+# CI/CD pipeline definitions → DevOps Team
+/.github/workflows/                 @beingakstyle
+# /.github/workflows/               @farmkart/devops-team

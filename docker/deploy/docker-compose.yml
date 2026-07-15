@@ -1,0 +1,60 @@
+# ============================================================
+# Server-side deployment compose file — TEMPLATE
+#
+# Copy to /opt/farmkart/docker-compose.yml on each environment
+# host (dev/qa/stage/prod). The CI/CD deploy workflow
+# (.github/workflows/_deploy.yml) SSHes in and runs:
+#
+#   export IMAGE_TAG=sha-<commit>
+#   docker compose pull && docker compose up -d
+#
+# IMAGE_TAG is the only variable the pipeline controls; all
+# runtime config comes from /opt/farmkart/.env on the host
+# (DB URLs, JWT_SECRET, KAFKA_BOOTSTRAP_SERVERS, etc.).
+#
+# Replace <owner>/<repo> with your GitHub repository path.
+# Infrastructure (MySQL/Kafka/Redis/ES) is assumed to be managed
+# separately (cloud services or the root docker-compose.yml).
+# ============================================================
+
+services:
+  farm-kart-app:
+    image: ghcr.io/<owner>/<repo>/farm-kart-app:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file: .env
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/farm-kart/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  farm-kart-notification:
+    image: ghcr.io/<owner>/<repo>/farm-kart-notification:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "8087:8087"
+    env_file: .env
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8087/notification-service/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  farm-kart-agent:
+    image: ghcr.io/<owner>/<repo>/farm-kart-agent:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "8091:8091"
+    env_file: .env
+    depends_on:
+      - farm-kart-app
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8091/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s

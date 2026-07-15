@@ -1,69 +1,49 @@
 # ============================================================
-# Farm Kart — Scheduled Security Scan
-# Runs OWASP Dependency Check every Sunday at 2 AM UTC
+# Scheduled Security Scan — weekly OWASP Dependency Check
+#
+# CVEs are published daily, so even with zero code changes the
+# dependency tree can become vulnerable. This weekly run catches
+# that; failures automatically open a GitHub issue.
+#
+# Reuses dependency-check.yml — no duplicated scan logic.
 # ============================================================
-
 name: Security Scan (Scheduled)
 
 on:
   schedule:
-    - cron: "0 2 * * 0"   # Every Sunday at 02:00 UTC
-  workflow_dispatch:        # Allow manual trigger
+    - cron: "0 2 * * 0"   # Every Sunday 02:00 UTC
+  workflow_dispatch:
 
-env:
-  JAVA_VERSION: "21"
-  JAVA_DISTRIBUTION: "temurin"
+permissions:
+  contents: read
+  issues: write
 
 jobs:
-  owasp-scan:
+  owasp:
     name: OWASP Dependency Check
+    uses: ./.github/workflows/dependency-check.yml
+    secrets: inherit
+
+  report-failure:
+    name: Open issue on failure
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-
+    needs: [owasp]
+    if: always() && needs.owasp.result == 'failure'
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - name: Set up Java ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: ${{ env.JAVA_DISTRIBUTION }}
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Run OWASP Dependency Check
-        run: |
-          mvn verify -P security-scan \
-            --batch-mode \
-            --no-transfer-progress \
-            -DskipTests
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-
-      - name: Upload OWASP HTML report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: owasp-report-${{ github.run_number }}
-          path: "**/target/dependency-check/**"
-          retention-days: 90
-
-      - name: Create GitHub Issue on failure
-        if: failure()
+      - name: Create GitHub issue
         uses: actions/github-script@v7
         with:
           script: |
-            github.rest.issues.create({
+            await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: '⚠️ OWASP Dependency Check failed — ' + new Date().toISOString().slice(0,10),
-              body: `The scheduled OWASP Dependency Check detected vulnerabilities with CVSS ≥ 7.\n\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n\nPlease review the uploaded artifact and update affected dependencies.`,
-              labels: ['security', 'dependencies']
-            })
+              title: '⚠️ OWASP Dependency Check failed — ' + new Date().toISOString().slice(0, 10),
+              body: [
+                'The scheduled OWASP Dependency Check detected vulnerabilities with CVSS ≥ 7.',
+                '',
+                `Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                '',
+                'Please review the uploaded artifact and update the affected dependencies.',
+              ].join('\n'),
+              labels: ['security', 'dependencies'],
+            });

@@ -108,6 +108,12 @@ management:
     web:
       exposure:
         include: health,info
+  endpoint:
+    health:
+      # Expose /actuator/health/liveness and /readiness for
+      # deployment verification (CI/CD) and k8s-style probes.
+      probes:
+        enabled: true
 
 springdoc:
   api-docs:
