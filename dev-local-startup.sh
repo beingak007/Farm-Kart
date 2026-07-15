@@ -52,10 +52,12 @@ start_service() {
 }
 
 # ── Build (skip if SKIP_BUILD=1) ─────────────────────────────────────────────
+BOOT="$ROOT/microservice_boot"
 if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
     echo "Building all modules…"
-    cd "$ROOT"
+    cd "$BOOT"
     mvn clean package -DskipTests -q
+    cd "$ROOT"
 fi
 
 # ── Service port map ──────────────────────────────────────────────────────────
@@ -66,15 +68,15 @@ fi
 
 # ── Start services (profile: ${SPRING_PROFILE}) ───────────────────────────────
 start_service "fk-app" \
-    "$ROOT/farm-kart/farm-kart-rest/target/farm-kart-rest-*.jar" \
+    "$BOOT/farm-kart/farm-kart-rest/target/farm-kart-rest-*.jar" \
     "${PROFILE_OPTS} -DMYSQL_DATASOURCE_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DMYSQL_DATASOURCE_USERNAME=$DB_USER -DMYSQL_DATASOURCE_PASSWORD=$DB_PASS"
 
 start_service "fk-notification" \
-    "$ROOT/farm-kart-notification/farm-kart-notification-rest/target/farm-kart-notification-rest-*.jar" \
+    "$BOOT/farm-kart-notification/farm-kart-notification-rest/target/farm-kart-notification-rest-*.jar" \
     "${PROFILE_OPTS} -DNOTIF_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_notification?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DNOTIF_DB_USER=$DB_USER -DNOTIF_DB_PASS=$DB_PASS"
 
 start_service "fk-agent" \
-    "$ROOT/farm-kart-agent/farm-kart-agent-rest/target/farm-kart-agent-rest-*.jar" \
+    "$BOOT/farm-kart-agent/farm-kart-agent-rest/target/farm-kart-agent-rest-*.jar" \
     "${PROFILE_OPTS} -DAGENT_DB_URL=jdbc:mysql://$DB_HOST:$DB_PORT/farmkart_agent?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true -DAGENT_DB_USER=$DB_USER -DAGENT_DB_PASS=$DB_PASS -DOPENAI_API_KEY=${OPENAI_API_KEY:-}"
 
 # ── UI ────────────────────────────────────────────────────────────────────────

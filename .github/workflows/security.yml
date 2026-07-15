@@ -99,6 +99,7 @@ jobs:
 
       # CodeQL for Java needs a real build to trace compilation.
       - name: Build for CodeQL
+        working-directory: microservice_boot
         run: >
           mvn clean package
           --batch-mode --no-transfer-progress

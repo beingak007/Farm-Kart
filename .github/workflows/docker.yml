@@ -51,11 +51,11 @@ jobs:
       matrix:
         include:
           - image: farm-kart-app
-            dockerfile: farm-kart/Dockerfile
+            dockerfile: microservice_boot/farm-kart/Dockerfile
           - image: farm-kart-notification
-            dockerfile: farm-kart-notification/Dockerfile
+            dockerfile: microservice_boot/farm-kart-notification/Dockerfile
           - image: farm-kart-agent
-            dockerfile: farm-kart-agent/Dockerfile
+            dockerfile: microservice_boot/farm-kart-agent/Dockerfile
 
     steps:
       - name: Checkout source
@@ -88,7 +88,9 @@ jobs:
       - name: Build ${{ inputs.push && 'and push ' || '' }}image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          # All Java code lives under microservice_boot/ — that's the
+          # Maven reactor root, so it is the Docker build context too.
+          context: microservice_boot
           file: ${{ matrix.dockerfile }}
           push: ${{ inputs.push }}
           tags: ${{ steps.meta.outputs.tags }}

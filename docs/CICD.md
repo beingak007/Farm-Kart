@@ -4,6 +4,11 @@ Enterprise-grade GitHub Actions pipeline for the Farm Kart platform
 (Java 21 · Spring Boot 3.3 · Maven multi-module · 3 deployables:
 `farm-kart-app` :8080, `farm-kart-notification` :8087, `farm-kart-agent` :8091).
 
+All Java code lives under **`microservice_boot/`** — that folder is the Maven
+reactor root, so every `mvn` step in the workflows runs with
+`working-directory: microservice_boot`, and Docker builds use it as the
+build context.
+
 ---
 
 ## 1. Pipeline at a glance

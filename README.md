@@ -140,39 +140,52 @@ POST /farm-kart/api/v1/farmers/onboard
 ## Project Structure
 
 ```
-farm-kart-parent/                         ← Root Maven POM (Java 21)
+FARM_CART_MICROSERVICE/
 │
-├── farm-kart-starter-common/             ← Shared foundation
-│   ├── ApiResponse, ApiError, ApiErrorCode, BusinessException
-│   ├── DomainEventPublisher, FkKafkaAutoConfiguration
-│   ├── FkTopics.java                     All Kafka topic constants
-│   ├── FkCacheNames.java                 All Redis cache key constants
-│   ├── RedisConfig.java                  Shared Redis/cache configuration
-│   └── Domain events (FarmerCreatedEvent, OrderCreatedEvent, UserRegisteredEvent, etc.)
+├── microservice_boot/                    ← ALL Java services live here (Maven reactor root)
+│   ├── pom.xml                           ← Root Maven POM (Java 21)
+│   ├── checkstyle.xml / pmd-ruleset.xml / spotbugs-exclude.xml / owasp-suppressions.xml
+│   │
+│   ├── farm-kart-starter-common/         ← Shared foundation
+│   │   ├── ApiResponse, ApiError, ApiErrorCode, BusinessException
+│   │   ├── DomainEventPublisher, FkKafkaAutoConfiguration
+│   │   ├── FkTopics.java                 All Kafka topic constants
+│   │   ├── FkCacheNames.java             All Redis cache key constants
+│   │   ├── RedisConfig.java              Shared Redis/cache configuration
+│   │   └── Domain events (FarmerCreatedEvent, OrderCreatedEvent, UserRegisteredEvent, etc.)
+│   │
+│   ├── farm-kart-common-rest/            ← REST config, exception handling, request tracing
+│   │   ├── GlobalExceptionHandler        Safe API errors (no internal leaks)
+│   │   ├── RequestIdFilter               X-Request-Id correlation
+│   │   └── ApiResponseBodyAdvice         meta on every response
+│   ├── farm-kart-framework/              ← Dynamic view/model metadata engine
+│   │
+│   ├── farm-kart/                        ← Farm Kart App (runnable, port 8080)
+│   │                                        boots ALL domain modules below
+│   ├── farm-kart-farmer/                 ← Farmer domain module     (merged into :8080)
+│   ├── farm-kart-buyer/                  ← Buyer domain module      (merged into :8080)
+│   ├── farm-kart-logistics/              ← Logistics domain module  (merged into :8080)
+│   ├── farm-kart-warehouse/              ← Warehouse domain module  (merged into :8080)
+│   ├── farm-kart-market-price/           ← Market Price domain module (merged into :8080)
+│   ├── farm-kart-admin/                  ← Admin domain module      (merged into :8080)
+│   ├── farm-kart-product-catalog/        ← Product Catalog domain module (merged into :8080)
+│   ├── farm-kart-reporting/              ← Reporting domain module  (merged into :8080)
+│   ├── farm-kart-ai-advisory/            ← AI Advisory domain module (merged into :8080)
+│   │
+│   ├── farm-kart-notification/           ← Notification Service (separate, port 8087)
+│   ├── farm-kart-agent/                  ← AI Agent Service     (separate, port 8091)
+│   │
+│   ├── farm-kart-complex-migration-tracker/  ← Multi-step DB migrations (SQL+CQL+ES)
+│   └── farm-kart-elasticsearch-manager/      ← Elasticsearch index mappings
 │
-├── farm-kart-common-rest/                ← REST config, exception handling, request tracing
-│   ├── GlobalExceptionHandler            Safe API errors (no internal leaks)
-│   ├── RequestIdFilter                   X-Request-Id correlation
-│   └── ApiResponseBodyAdvice             meta on every response
-├── farm-kart-framework/                  ← Dynamic view/model metadata engine
-│
-├── farm-kart/                            ← Farm Kart App (runnable, port 8080)
-│                                            boots ALL domain modules below
-├── farm-kart-farmer/                     ← Farmer domain module     (merged into :8080)
-├── farm-kart-buyer/                      ← Buyer domain module      (merged into :8080)
-├── farm-kart-logistics/                  ← Logistics domain module  (merged into :8080)
-├── farm-kart-warehouse/                  ← Warehouse domain module  (merged into :8080)
-├── farm-kart-market-price/               ← Market Price domain module (merged into :8080)
-├── farm-kart-admin/                      ← Admin domain module      (merged into :8080)
-├── farm-kart-product-catalog/            ← Product Catalog domain module (merged into :8080)
-├── farm-kart-reporting/                  ← Reporting domain module  (merged into :8080)
-├── farm-kart-ai-advisory/                ← AI Advisory domain module (merged into :8080)
-│
-├── farm-kart-notification/               ← Notification Service (separate, port 8087)
-├── farm-kart-agent/                      ← AI Agent Service     (separate, port 8091)
-│
-└── farm-kart-ui/                         ← React frontend          (port 5173)
+├── farm-kart-ui/                         ← React frontend          (port 5173)
+├── farm-kart-mcp/                        ← MCP server (TypeScript)
+├── docker/ · infra/ · scripts/ · docs/   ← Infra, deploy templates, tooling, docs
+└── .github/                              ← CI/CD workflows
 ```
+
+> Java build commands ab `microservice_boot/` ke andar chalte hain:
+> `cd microservice_boot && mvn clean package`
 
 Each domain is a **4-layer Maven sub-project** (module boundaries preserved after the merge):
 ```
@@ -300,9 +313,9 @@ Flyway settings (all services): `baseline-on-migrate`, `out-of-order`, `validate
 
 | Module | Purpose |
 |--------|---------|
-| `farm-kart-complex-migration-tracker/` | Multi-step MySQL + Cassandra + Elasticsearch migrations |
-| `farm-kart-elasticsearch-manager/` | Elasticsearch index templates (**not Solr**) |
-| `{service}-rest/cassandra/migration/` | Per-service Cassandra CQL scripts |
+| `microservice_boot/farm-kart-complex-migration-tracker/` | Multi-step MySQL + Cassandra + Elasticsearch migrations |
+| `microservice_boot/farm-kart-elasticsearch-manager/` | Elasticsearch index templates (**not Solr**) |
+| `microservice_boot/{service}/{service}-rest/cassandra/migration/` | Per-service Cassandra CQL scripts |
 
 ---
 

@@ -60,7 +60,7 @@ services:
 
   farm-kart-app:
     build:
-      context: .
+      context: ./microservice_boot
       dockerfile: farm-kart/Dockerfile
     container_name: farmkart-app
     ports:

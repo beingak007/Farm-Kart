@@ -39,6 +39,10 @@ jobs:
     timeout-minutes: 25
     outputs:
       artifact-name: farm-kart-jars-${{ github.sha }}
+    defaults:
+      run:
+        # All Java modules live under microservice_boot/ (Maven reactor root)
+        working-directory: microservice_boot
 
     steps:
       - name: Checkout source
@@ -62,10 +66,11 @@ jobs:
         with:
           name: farm-kart-jars-${{ github.sha }}
           # Only the 3 deployables produce runnable Spring Boot jars
+          # (artifact paths are workspace-relative, hence the prefix)
           path: |
-            farm-kart/farm-kart-rest/target/farm-kart-rest-*.jar
-            farm-kart-notification/farm-kart-notification-rest/target/farm-kart-notification-rest-*.jar
-            farm-kart-agent/farm-kart-agent-rest/target/farm-kart-agent-rest-*.jar
+            microservice_boot/farm-kart/farm-kart-rest/target/farm-kart-rest-*.jar
+            microservice_boot/farm-kart-notification/farm-kart-notification-rest/target/farm-kart-notification-rest-*.jar
+            microservice_boot/farm-kart-agent/farm-kart-agent-rest/target/farm-kart-agent-rest-*.jar
             !**/original-*.jar
           retention-days: 14
           if-no-files-found: error

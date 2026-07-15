@@ -7,6 +7,10 @@ Migration conventions follow the Yagna `microservices_boot` pattern, adapted for
 
 | Engine | Location | File pattern | Example |
 |--------|----------|--------------|---------|
+All migration folders live under **`microservice_boot/`** (same root as the Java modules).
+
+| Engine | Location (inside `microservice_boot/`) | File pattern | Example |
+|--------|----------|--------------|---------|
 | **MySQL** (per microservice) | `{service}-repository/src/main/resources/db/migration/{service_key}/` | `V{epoch_seconds}__{JIRA_ID}.sql` | `V1740787200__FARM-004.sql` |
 | **PostgreSQL** (framework) | `farm-kart-framework-repository/.../db/migration/framework/` | `V{epoch_seconds}__{JIRA_ID}.sql` | `V1719504000__FARM-001.sql` |
 | **Cassandra** (per microservice) | `{service}-rest/src/main/resources/cassandra/migration/` | `{epoch_seconds}_{JIRA_ID}.cql` | `1740787200_FARM-100.cql` |
@@ -64,7 +68,8 @@ Programmatic Flyway (marketplace + framework) uses `FlywayMigrationDefaults` in 
 
 ## Complex migrations
 
-For changes spanning MySQL + Cassandra + Elasticsearch + ETL, use `farm-kart-complex-migration-tracker/`:
+For changes spanning MySQL + Cassandra + Elasticsearch + ETL, use
+`microservice_boot/farm-kart-complex-migration-tracker/`:
 
 ```
 V{epoch}__FARM-xxx/
@@ -79,12 +84,12 @@ V{epoch}__FARM-xxx/
 Validate before commit:
 
 ```bash
-cd farm-kart-complex-migration-tracker && ./validate.sh
+cd microservice_boot/farm-kart-complex-migration-tracker && ./validate.sh
 ```
 
 ## Elasticsearch (not Solr)
 
-Index mappings live in `farm-kart-elasticsearch-manager`. The product catalog service reads
+Index mappings live in `microservice_boot/farm-kart-elasticsearch-manager`. The product catalog service reads
 `ELASTICSEARCH_HOST` and uses indices created by the ES migration runner.
 
 **Do not use Solr** — Farm Kart standardises on Elasticsearch 8.x for full-text crop/product search.

@@ -14,41 +14,41 @@
 # Root configuration & CI
 # -------------------------------------------------------
 /.github/                           @beingakstyle
-/pom.xml                            @beingakstyle
+/microservice_boot/pom.xml          @beingakstyle
 /.gitignore                         @beingakstyle
 /docker-compose.yml                 @beingakstyle
 
 # -------------------------------------------------------
+# Java services — all live under /microservice_boot/
+# -------------------------------------------------------
+
 # Shared / Framework modules
-# -------------------------------------------------------
-/farm-kart-starter-common/          @beingakstyle
-/farm-kart-common-rest/             @beingakstyle
-/farm-kart-framework/               @beingakstyle
+/microservice_boot/farm-kart-starter-common/    @beingakstyle
+/microservice_boot/farm-kart-common-rest/       @beingakstyle
+/microservice_boot/farm-kart-framework/         @beingakstyle
 
-# -------------------------------------------------------
-# Core Marketplace Service
-# -------------------------------------------------------
-/farm-kart/                         @beingakstyle
+# Core Marketplace Service (merged monolith)
+/microservice_boot/farm-kart/                   @beingakstyle
 
-# -------------------------------------------------------
-# Domain Microservices
-# -------------------------------------------------------
-/farm-kart-farmer/                  @beingakstyle
-/farm-kart-buyer/                   @beingakstyle
-/farm-kart-product-catalog/         @beingakstyle
-/farm-kart-logistics/               @beingakstyle
-/farm-kart-warehouse/               @beingakstyle
-/farm-kart-market-price/            @beingakstyle
-/farm-kart-notification/            @beingakstyle
-/farm-kart-admin/                   @beingakstyle
-/farm-kart-reporting/               @beingakstyle
+# Domain modules
+/microservice_boot/farm-kart-farmer/            @beingakstyle
+/microservice_boot/farm-kart-buyer/             @beingakstyle
+/microservice_boot/farm-kart-product-catalog/   @beingakstyle
+/microservice_boot/farm-kart-logistics/         @beingakstyle
+/microservice_boot/farm-kart-warehouse/         @beingakstyle
+/microservice_boot/farm-kart-market-price/      @beingakstyle
+/microservice_boot/farm-kart-notification/      @beingakstyle
+/microservice_boot/farm-kart-admin/             @beingakstyle
+/microservice_boot/farm-kart-reporting/         @beingakstyle
 
-# -------------------------------------------------------
 # AI / Agent / Advisory
-# -------------------------------------------------------
-/farm-kart-ai-advisory/             @beingakstyle
-/farm-kart-agent/                   @beingakstyle
+/microservice_boot/farm-kart-ai-advisory/       @beingakstyle
+/microservice_boot/farm-kart-agent/             @beingakstyle
 /farm-kart-mcp/                     @beingakstyle
+
+# Migration modules
+/microservice_boot/farm-kart-complex-migration-tracker/  @beingakstyle
+/microservice_boot/farm-kart-elasticsearch-manager/      @beingakstyle
 
 # -------------------------------------------------------
 # Frontend

@@ -14,7 +14,8 @@ JIRA="${3:?JIRA id required e.g. FARM-123}"
 DESC="${4:-migration}"
 
 EPOCH="$(date +%s)"
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# All Java modules live under microservice_boot/
+ROOT="$(cd "$(dirname "$0")/.." && pwd)/microservice_boot"
 
 case "$DB_TYPE" in
   mysql|postgres)

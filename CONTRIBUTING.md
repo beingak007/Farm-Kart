@@ -60,15 +60,16 @@ By participating in this project you agree to maintain a respectful, inclusive, 
 ### Local Startup
 
 ```bash
-# Start infrastructure (MySQL, Redis, Kafka, Zookeeper)
+# Start infrastructure + all services (MySQL, Redis, Kafka, apps)
 ./dev-local-startup.sh
 
-# Build all modules
-./mvnw clean install -DskipTests
+# Build all Java modules (reactor root is microservice_boot/)
+cd microservice_boot
+mvn clean install -DskipTests
 
-# Run a specific microservice
-cd farm-kart-farmer/farm-kart-farmer-rest
-./mvnw spring-boot:run
+# Run the main app directly
+cd microservice_boot/farm-kart/farm-kart-rest
+mvn spring-boot:run
 ```
 
 ---

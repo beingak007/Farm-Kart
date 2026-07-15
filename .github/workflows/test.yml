@@ -37,6 +37,9 @@ jobs:
     name: Unit + Integration Tests
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: microservice_boot
 
     steps:
       - name: Checkout source

@@ -8,9 +8,9 @@ version: 2
 
 updates:
 
-  # ── Maven (Java — all pom.xml files) ──────────────────────
+  # ── Maven (Java — all pom.xml files under microservice_boot) ──
   - package-ecosystem: "maven"
-    directory: "/"
+    directory: "/microservice_boot"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -124,9 +124,12 @@ updates:
     commit-message:
       prefix: "chore(deps-mcp)"
 
-  # ── Docker (docker-compose.yml) ────────────────────────────
+  # ── Docker (Dockerfiles of the 3 deployables) ──────────────
   - package-ecosystem: "docker"
-    directory: "/"
+    directories:
+      - "/microservice_boot/farm-kart"
+      - "/microservice_boot/farm-kart-notification"
+      - "/microservice_boot/farm-kart-agent"
     schedule:
       interval: "monthly"
       day: "monday"
