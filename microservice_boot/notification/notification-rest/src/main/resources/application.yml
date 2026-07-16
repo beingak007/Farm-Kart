@@ -49,6 +49,18 @@ management:
       probes:
         enabled: true
 
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8084/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    health-check-url-path: /notification-service/actuator/health
+    status-page-url-path: /notification-service/actuator/info
+
 springdoc:
   api-docs:
     path: /notification-service/api-docs

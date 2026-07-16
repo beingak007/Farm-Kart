@@ -56,6 +56,10 @@ jobs:
             dockerfile: microservice_boot/notification/Dockerfile
           - image: agent
             dockerfile: microservice_boot/agent/Dockerfile
+          - image: discovery-service
+            dockerfile: microservice_boot/discovery-service/Dockerfile
+          - image: api-gateway
+            dockerfile: microservice_boot/api-gateway/Dockerfile
 
     steps:
       - name: Checkout source

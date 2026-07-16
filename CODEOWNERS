@@ -46,6 +46,10 @@
 /microservice_boot/agent/             @beingakstyle
 /farm-kart-mcp/                     @beingakstyle
 
+# Platform — discovery + gateway
+/microservice_boot/discovery-service/  @beingakstyle
+/microservice_boot/api-gateway/        @beingakstyle
+
 # Migration modules
 /microservice_boot/complex-migration-tracker/  @beingakstyle
 /microservice_boot/elasticsearch-manager/      @beingakstyle

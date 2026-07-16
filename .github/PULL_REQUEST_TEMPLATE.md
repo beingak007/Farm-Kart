@@ -43,6 +43,8 @@ Fixes # <!-- Issue number, e.g., Fixes #123 -->
 - [ ] reporting
 - [ ] ai-advisory
 - [ ] agent
+- [ ] discovery-service (Eureka)
+- [ ] api-gateway (Cloud Gateway)
 - [ ] starter-common / common-rest / framework (Shared)
 - [ ] farm-kart-ui (Frontend)
 - [ ] Infrastructure / CI

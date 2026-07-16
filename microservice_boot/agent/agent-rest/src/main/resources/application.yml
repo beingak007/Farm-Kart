@@ -46,6 +46,18 @@ management:
       probes:
         enabled: true
 
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8084/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    health-check-url-path: /agent-service/actuator/health
+    status-page-url-path: /agent-service/actuator/info
+
 springdoc:
   api-docs:
     path: /v3/api-docs

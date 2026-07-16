@@ -180,6 +180,11 @@ FARM_CART_MICROSERVICE/
 │   ├── notification/           ← Notification Service (separate, port 8087)
 │   ├── agent/                  ← AI Agent Service     (separate, port 8091)
 │   │
+│   ├── discovery-service/      ← Eureka registry      (port 8084)
+│   │   └── discovery-service-rest/
+│   ├── api-gateway/            ← Spring Cloud Gateway (port 8079)
+│   │   └── api-gateway-rest/
+│   │
 │   ├── complex-migration-tracker/  ← Multi-step DB migrations (SQL+CQL+ES)
 │   └── elasticsearch-manager/      ← Elasticsearch index mappings
 │
@@ -201,19 +206,24 @@ Each domain follows the Yagna-style **4-layer** layout (no `farm-kart-` prefix o
 └── {service}-rest/                Controllers (plain jar; merged domains have no own main class)
 ```
 
-Only `marketplace`, `notification` and `agent` produce runnable Spring Boot jars.
+Only `marketplace`, `notification`, `agent`, `discovery-service` and `api-gateway` produce runnable Spring Boot jars.
 
 ---
 
 ## Services & Responsibilities
 
-**Deployables (3):**
+**Deployables (5):**
 
-| Deployable | Port | DB | Contains |
-|---|---|---|---|
-| **Farm Kart App** | 8080 | farmkart (MySQL) + farmkart_framework / farmkart_warehouse_app (PostgreSQL) | Marketplace, Farmer, Buyer, Logistics, Warehouse, Market Price, Admin, Product Catalog, Reporting, AI Advisory |
-| **Notification** | 8087 | farmkart_notification | SMS/Email/Push/WhatsApp, **domain event consumer** (`DomainNotificationConsumer`), template-based |
-| **Agent** | 8091 | farmkart_agent | ReAct LLM agent (OpenAI), tool calls into Farm Kart App REST APIs |
+| Deployable | Port | Role |
+|---|---|---|
+| **discovery-service** | 8084 | Netflix Eureka registry (Yagna-style) |
+| **api-gateway** | 8079 | Spring Cloud Gateway — single entry (`/farm-kart/**`, `/notification-service/**`, `/agent-service/**`) via `lb://` |
+| **Farm Kart App** (`marketplace`) | 8080 | Marketplace + merged domains (MySQL `farmkart` + Postgres) |
+| **Notification** | 8087 | SMS/Email/Push consumers |
+| **Agent** | 8091 | LLM agent service |
+
+Gateway traffic example: `http://localhost:8079/farm-kart/swagger-ui.html` → Eureka → marketplace `:8080`.
+Without Eureka locally: `EUREKA_ENABLED=false GATEWAY_STATIC=1 ./dev-local-startup.sh`.
 
 **Domain modules inside the Farm Kart App (all on :8080, context path `/farm-kart`):**
 

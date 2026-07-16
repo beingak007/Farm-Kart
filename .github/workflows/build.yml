@@ -71,6 +71,8 @@ jobs:
             microservice_boot/marketplace/marketplace-rest/target/marketplace-rest-*.jar
             microservice_boot/notification/notification-rest/target/notification-rest-*.jar
             microservice_boot/agent/agent-rest/target/agent-rest-*.jar
+            microservice_boot/discovery-service/discovery-service-rest/target/discovery-service-rest-*.jar
+            microservice_boot/api-gateway/api-gateway-rest/target/api-gateway-rest-*.jar
             !**/original-*.jar
           retention-days: 14
           if-no-files-found: error

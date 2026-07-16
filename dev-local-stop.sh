@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Stop all Farm Kart screen sessions
 
-SESSIONS="fk-app fk-notification fk-agent fk-ui"
+SESSIONS="fk-discovery fk-gateway fk-app fk-notification fk-agent fk-ui"
 
 for SESSION in $SESSIONS; do
     if screen -list | grep -q "$SESSION"; then

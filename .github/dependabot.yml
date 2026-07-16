@@ -130,6 +130,8 @@ updates:
       - "/microservice_boot/marketplace"
       - "/microservice_boot/notification"
       - "/microservice_boot/agent"
+      - "/microservice_boot/discovery-service"
+      - "/microservice_boot/api-gateway"
     schedule:
       interval: "monthly"
       day: "monday"
