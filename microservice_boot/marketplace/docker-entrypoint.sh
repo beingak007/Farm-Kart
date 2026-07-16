@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-APP_FILE=${1:-farm-kart-rest.jar}
+APP_FILE=${1:-marketplace-rest.jar}
 echo "Starting ${APP_FILE}"
 
 # Prod by default in containers; override with SPRING_PROFILES_ACTIVE=dev

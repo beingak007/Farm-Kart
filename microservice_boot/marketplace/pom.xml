@@ -8,13 +8,13 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart</artifactId>
+    <artifactId>marketplace</artifactId>
     <packaging>pom</packaging>
-    <name>farm-kart</name>
+    <name>marketplace</name>
     <modules>
-        <module>farm-kart-client</module>
-        <module>farm-kart-repository</module>
-        <module>farm-kart-service</module>
-        <module>farm-kart-rest</module>
+        <module>marketplace-client</module>
+        <module>marketplace-repository</module>
+        <module>marketplace-services</module>
+        <module>marketplace-rest</module>
     </modules>
 </project>

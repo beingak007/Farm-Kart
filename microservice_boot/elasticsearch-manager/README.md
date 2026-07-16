@@ -37,4 +37,4 @@ curl -X PUT "http://localhost:9200/_index_template/farmkart_crops" \
 | `ELASTICSEARCH_USERNAME` | — |
 | `ELASTICSEARCH_PASSWORD` | — |
 
-Used by `farm-kart-product-catalog` for crop search APIs.
+Used by `product-catalog` for crop search APIs.

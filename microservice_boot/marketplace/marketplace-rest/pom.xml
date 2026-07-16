@@ -5,60 +5,60 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.farmkart</groupId>
-        <artifactId>farm-kart</artifactId>
+        <artifactId>marketplace</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-rest</artifactId>
-    <name>farm-kart-rest</name>
+    <artifactId>marketplace-rest</artifactId>
+    <name>marketplace-rest</name>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-common-rest</artifactId>
+            <artifactId>common-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-service</artifactId>
+            <artifactId>marketplace-services</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-framework-repository</artifactId>
+            <artifactId>framework-repository</artifactId>
         </dependency>
         <!-- Merged domain modules (previously standalone microservices) -->
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-farmer-rest</artifactId>
+            <artifactId>farmer-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-buyer-rest</artifactId>
+            <artifactId>buyer-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-logistics-rest</artifactId>
+            <artifactId>logistics-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-warehouse-rest</artifactId>
+            <artifactId>warehouse-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-market-price-rest</artifactId>
+            <artifactId>market-price-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-admin-rest</artifactId>
+            <artifactId>admin-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-product-catalog-rest</artifactId>
+            <artifactId>product-catalog-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-reporting-rest</artifactId>
+            <artifactId>reporting-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-ai-advisory-rest</artifactId>
+            <artifactId>ai-advisory-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

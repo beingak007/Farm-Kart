@@ -8,13 +8,13 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-common-rest</artifactId>
-    <name>farm-kart-common-rest</name>
+    <artifactId>common-rest</artifactId>
+    <name>common-rest</name>
     <description>Shared REST configuration, exception handling, MySQL JPA base</description>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-starter-common</artifactId>
+            <artifactId>starter-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

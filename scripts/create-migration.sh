@@ -21,20 +21,21 @@ case "$DB_TYPE" in
   mysql|postgres)
     EXT="sql"
     if [[ "$SERVICE" == "framework" ]]; then
-      DIR="$ROOT/farm-kart-framework/farm-kart-framework-repository/src/main/resources/db/migration/framework"
+      DIR="$ROOT/framework/framework-repository/src/main/resources/db/migration/framework"
     elif [[ "$SERVICE" == "marketplace" ]]; then
-      DIR="$ROOT/farm-kart/farm-kart-repository/src/main/resources/db/migration/marketplace"
+      DIR="$ROOT/marketplace/marketplace-repository/src/main/resources/db/migration/marketplace"
     else
-      DIR="$ROOT/farm-kart-${SERVICE}/farm-kart-${SERVICE}-repository/src/main/resources/db/migration/${SERVICE//-/_}"
+      # Yagna-style: microservice_boot/{service}/{service}-repository/...
+      DIR="$ROOT/${SERVICE}/${SERVICE}-repository/src/main/resources/db/migration/${SERVICE//-/_}"
       if [[ ! -d "$DIR" ]]; then
-        DIR="$ROOT/farm-kart-${SERVICE}/farm-kart-${SERVICE}-repository/src/main/resources/db/migration/${SERVICE}"
+        DIR="$ROOT/${SERVICE}/${SERVICE}-repository/src/main/resources/db/migration/${SERVICE}"
       fi
     fi
     FILE="V${EPOCH}__${JIRA}.sql"
     ;;
   cassandra)
     EXT="cql"
-    DIR="$ROOT/farm-kart-${SERVICE}/farm-kart-${SERVICE}-rest/src/main/resources/cassandra/migration"
+    DIR="$ROOT/${SERVICE}/${SERVICE}-rest/src/main/resources/cassandra/migration"
     FILE="${EPOCH}_${JIRA}.cql"
     ;;
   *)

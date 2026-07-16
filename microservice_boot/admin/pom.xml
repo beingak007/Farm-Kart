@@ -7,14 +7,14 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-admin</artifactId>
+    <artifactId>admin</artifactId>
     <packaging>pom</packaging>
-    <name>farm-kart-admin</name>
+    <name>admin</name>
     <description>Admin Service — platform configuration, audit logs, monitoring</description>
     <modules>
-        <module>farm-kart-admin-client</module>
-        <module>farm-kart-admin-repository</module>
-        <module>farm-kart-admin-service</module>
-        <module>farm-kart-admin-rest</module>
+        <module>admin-client</module>
+        <module>admin-repository</module>
+        <module>admin-services</module>
+        <module>admin-rest</module>
     </modules>
 </project>

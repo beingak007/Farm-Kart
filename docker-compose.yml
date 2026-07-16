@@ -61,7 +61,7 @@ services:
   farm-kart-app:
     build:
       context: ./microservice_boot
-      dockerfile: farm-kart/Dockerfile
+      dockerfile: marketplace/Dockerfile
     container_name: farmkart-app
     ports:
       - "8080:8080"

@@ -4,15 +4,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.farmkart</groupId>
-        <artifactId>farm-kart-agent</artifactId>
+        <artifactId>agent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-agent-repository</artifactId>
-    <name>farm-kart-agent-repository</name>
+    <artifactId>agent-repository</artifactId>
+    <name>agent-repository</name>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-agent-client</artifactId>
+            <artifactId>agent-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

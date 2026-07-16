@@ -7,14 +7,14 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-buyer</artifactId>
+    <artifactId>buyer</artifactId>
     <packaging>pom</packaging>
-    <name>farm-kart-buyer</name>
+    <name>buyer</name>
     <description>Buyer Service — buyer onboarding and profile management</description>
     <modules>
-        <module>farm-kart-buyer-client</module>
-        <module>farm-kart-buyer-repository</module>
-        <module>farm-kart-buyer-service</module>
-        <module>farm-kart-buyer-rest</module>
+        <module>buyer-client</module>
+        <module>buyer-repository</module>
+        <module>buyer-services</module>
+        <module>buyer-rest</module>
     </modules>
 </project>

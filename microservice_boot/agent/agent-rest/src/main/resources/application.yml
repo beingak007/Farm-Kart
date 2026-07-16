@@ -5,7 +5,7 @@ server:
 
 spring:
   application:
-    name: farm-kart-agent
+    name: agent
 
   datasource:
     url: ${AGENT_DB_URL:jdbc:mysql://localhost:3306/farmkart_agent?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC}

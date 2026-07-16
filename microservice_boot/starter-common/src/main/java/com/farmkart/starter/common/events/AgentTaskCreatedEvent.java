@@ -22,7 +22,7 @@ public record AgentTaskCreatedEvent(
         return new AgentTaskCreatedEvent(
             UUID.randomUUID().toString(),
             "AGENT_TASK_CREATED",
-            "farm-kart-agent",
+            "agent",
             Instant.now(),
             sessionUuid, userId, role, msg
         );

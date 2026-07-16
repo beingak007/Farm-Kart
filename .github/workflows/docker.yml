@@ -3,8 +3,8 @@
 #
 # Builds one image per deployable via a MATRIX (parallel):
 #   - farm-kart-app     (merged monolith, :8080)
-#   - farm-kart-notification (:8087)
-#   - farm-kart-agent   (:8091)
+#   - notification (:8087)
+#   - agent   (:8091)
 #
 # Tagging strategy (docker/metadata-action):
 #   - sha-<short-sha>   → every build (immutable, used for deploy + rollback)
@@ -51,11 +51,11 @@ jobs:
       matrix:
         include:
           - image: farm-kart-app
-            dockerfile: microservice_boot/farm-kart/Dockerfile
-          - image: farm-kart-notification
-            dockerfile: microservice_boot/farm-kart-notification/Dockerfile
-          - image: farm-kart-agent
-            dockerfile: microservice_boot/farm-kart-agent/Dockerfile
+            dockerfile: microservice_boot/marketplace/Dockerfile
+          - image: notification
+            dockerfile: microservice_boot/notification/Dockerfile
+          - image: agent
+            dockerfile: microservice_boot/agent/Dockerfile
 
     steps:
       - name: Checkout source

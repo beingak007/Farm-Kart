@@ -7,14 +7,14 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-market-price</artifactId>
+    <artifactId>market-price</artifactId>
     <packaging>pom</packaging>
-    <name>farm-kart-market-price</name>
+    <name>market-price</name>
     <description>Market Price Service — mandi rates and price analytics</description>
     <modules>
-        <module>farm-kart-market-price-client</module>
-        <module>farm-kart-market-price-repository</module>
-        <module>farm-kart-market-price-service</module>
-        <module>farm-kart-market-price-rest</module>
+        <module>market-price-client</module>
+        <module>market-price-repository</module>
+        <module>market-price-services</module>
+        <module>market-price-rest</module>
     </modules>
 </project>

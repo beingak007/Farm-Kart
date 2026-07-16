@@ -4,19 +4,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.farmkart</groupId>
-        <artifactId>farm-kart-market-price</artifactId>
+        <artifactId>market-price</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-market-price-service</artifactId>
-    <name>farm-kart-market-price-service</name>
+    <artifactId>market-price-services</artifactId>
+    <name>market-price-services</name>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-market-price-repository</artifactId>
+            <artifactId>market-price-repository</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-starter-common</artifactId>
+            <artifactId>starter-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>

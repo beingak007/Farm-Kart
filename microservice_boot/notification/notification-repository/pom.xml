@@ -4,15 +4,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.farmkart</groupId>
-        <artifactId>farm-kart-notification</artifactId>
+        <artifactId>notification</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-notification-repository</artifactId>
-    <name>farm-kart-notification-repository</name>
+    <artifactId>notification-repository</artifactId>
+    <name>notification-repository</name>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-notification-client</artifactId>
+            <artifactId>notification-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -5,15 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.farmkart</groupId>
-        <artifactId>farm-kart-framework</artifactId>
+        <artifactId>framework</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-framework-client</artifactId>
-    <name>farm-kart-framework-client</name>
+    <artifactId>framework-client</artifactId>
+    <name>framework-client</name>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-starter-common</artifactId>
+            <artifactId>starter-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

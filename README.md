@@ -27,12 +27,12 @@ All REST services return the same JSON contract. Internal stack traces, SQL, and
 
 | Component | Module / path |
 |---|---|
-| `ApiResponse`, `ApiError`, `ApiErrorCode`, `FieldErrorDetail`, `ResponseMeta` | `farm-kart-starter-common/.../dto/` |
-| `BusinessException` (safe user-facing messages + error codes) | `farm-kart-starter-common/.../exception/` |
-| `RequestContext` (correlation ID via MDC) | `farm-kart-starter-common/.../context/` |
-| `RequestIdFilter` (`X-Request-Id` on every request/response) | `farm-kart-common-rest/.../filter/` |
-| `GlobalExceptionHandler` (validation, 404, 409, 500 — safe messages only) | `farm-kart-common-rest/.../exception/` |
-| `ApiResponseBodyAdvice` (adds `meta.requestId` + `meta.timestamp` on success) | `farm-kart-common-rest/.../advice/` |
+| `ApiResponse`, `ApiError`, `ApiErrorCode`, `FieldErrorDetail`, `ResponseMeta` | `starter-common/.../dto/` |
+| `BusinessException` (safe user-facing messages + error codes) | `starter-common/.../exception/` |
+| `RequestContext` (correlation ID via MDC) | `starter-common/.../context/` |
+| `RequestIdFilter` (`X-Request-Id` on every request/response) | `common-rest/.../filter/` |
+| `GlobalExceptionHandler` (validation, 404, 409, 500 — safe messages only) | `common-rest/.../exception/` |
+| `ApiResponseBodyAdvice` (adds `meta.requestId` + `meta.timestamp` on success) | `common-rest/.../advice/` |
 | UI client — `ApiClientError`, `parseApiResponse()` | `farm-kart-ui/src/api/errors.js`, `client.js` |
 | MCP client — `FarmKartApiError`, typed `unwrap()` | `farm-kart-mcp/src/clients/api.ts`, `types/index.ts` |
 
@@ -67,18 +67,18 @@ Events publish **after DB commit** via `DomainEventPublisher` — no ghost event
 
 | Component | Module / path |
 |---|---|
-| `FkTopics`, `FkBaseEvent`, domain event records | `farm-kart-starter-common/.../events/` |
-| `DomainEventPublisher` (transaction-aware publish) | `farm-kart-starter-common/.../events/` |
-| `FkKafkaAutoConfiguration`, `EventProcessingGuard` | `farm-kart-starter-common/.../configuration/` |
-| `FkKafkaConsumerConfiguration` (`@EnableKafka`) | `farm-kart-starter-common/.../events/` |
-| `PlatformAuditConsumer` (writes audit logs from domain events) | `farm-kart-admin/.../service/` |
-| `DomainNotificationConsumer` (welcome, order, payment, delivery alerts) | `farm-kart-notification/.../service/` |
-| `DurableEventGuard` + `processed_domain_events` table (idempotency) | `farm-kart-admin`, `farm-kart-notification` |
+| `FkTopics`, `FkBaseEvent`, domain event records | `starter-common/.../events/` |
+| `DomainEventPublisher` (transaction-aware publish) | `starter-common/.../events/` |
+| `FkKafkaAutoConfiguration`, `EventProcessingGuard` | `starter-common/.../configuration/` |
+| `FkKafkaConsumerConfiguration` (`@EnableKafka`) | `starter-common/.../events/` |
+| `PlatformAuditConsumer` (writes audit logs from domain events) | `admin/.../service/` |
+| `DomainNotificationConsumer` (welcome, order, payment, delivery alerts) | `notification/.../service/` |
+| `DurableEventGuard` + `processed_domain_events` table (idempotency) | `admin`, `notification` |
 
 **Event flow example (farmer onboard):**
 
 ```
-POST /farm-kart/api/v1/farmers/onboard
+POST /marketplace/api/v1/farmers/onboard
   → DB save
   → Kafka: farmkart.farmer.created
   → Admin module (same app): audit log
@@ -146,7 +146,7 @@ FARM_CART_MICROSERVICE/
 │   ├── pom.xml                           ← Root Maven POM (Java 21)
 │   ├── checkstyle.xml / pmd-ruleset.xml / spotbugs-exclude.xml / owasp-suppressions.xml
 │   │
-│   ├── farm-kart-starter-common/         ← Shared foundation
+│   ├── starter-common/         ← Shared foundation
 │   │   ├── ApiResponse, ApiError, ApiErrorCode, BusinessException
 │   │   ├── DomainEventPublisher, FkKafkaAutoConfiguration
 │   │   ├── FkTopics.java                 All Kafka topic constants
@@ -154,29 +154,34 @@ FARM_CART_MICROSERVICE/
 │   │   ├── RedisConfig.java              Shared Redis/cache configuration
 │   │   └── Domain events (FarmerCreatedEvent, OrderCreatedEvent, UserRegisteredEvent, etc.)
 │   │
-│   ├── farm-kart-common-rest/            ← REST config, exception handling, request tracing
+│   ├── common-rest/            ← REST config, exception handling, request tracing
 │   │   ├── GlobalExceptionHandler        Safe API errors (no internal leaks)
 │   │   ├── RequestIdFilter               X-Request-Id correlation
 │   │   └── ApiResponseBodyAdvice         meta on every response
-│   ├── farm-kart-framework/              ← Dynamic view/model metadata engine
+│   ├── framework/              ← Dynamic view/model metadata engine
 │   │
-│   ├── farm-kart/                        ← Farm Kart App (runnable, port 8080)
-│   │                                        boots ALL domain modules below
-│   ├── farm-kart-farmer/                 ← Farmer domain module     (merged into :8080)
-│   ├── farm-kart-buyer/                  ← Buyer domain module      (merged into :8080)
-│   ├── farm-kart-logistics/              ← Logistics domain module  (merged into :8080)
-│   ├── farm-kart-warehouse/              ← Warehouse domain module  (merged into :8080)
-│   ├── farm-kart-market-price/           ← Market Price domain module (merged into :8080)
-│   ├── farm-kart-admin/                  ← Admin domain module      (merged into :8080)
-│   ├── farm-kart-product-catalog/        ← Product Catalog domain module (merged into :8080)
-│   ├── farm-kart-reporting/              ← Reporting domain module  (merged into :8080)
-│   ├── farm-kart-ai-advisory/            ← AI Advisory domain module (merged into :8080)
+│   ├── marketplace/              ← Farm Kart App (runnable, port 8080)
+│   │                                boots ALL domain modules below
+│   │   ├── marketplace-client
+│   │   ├── marketplace-repository
+│   │   ├── marketplace-services
+│   │   └── marketplace-rest
+│   ├── farmer/                   ← Farmer domain module     (merged into :8080)
+│   │   ├── farmer-client / farmer-repository / farmer-services / farmer-rest
+│   ├── buyer/                    ← Buyer domain module      (merged into :8080)
+│   ├── logistics/                ← Logistics domain module  (merged into :8080)
+│   ├── warehouse/                ← Warehouse domain module  (merged into :8080)
+│   ├── market-price/             ← Market Price domain module (merged into :8080)
+│   ├── admin/                    ← Admin domain module      (merged into :8080)
+│   ├── product-catalog/          ← Product Catalog domain module (merged into :8080)
+│   ├── reporting/                ← Reporting domain module  (merged into :8080)
+│   ├── ai-advisory/              ← AI Advisory domain module (merged into :8080)
 │   │
-│   ├── farm-kart-notification/           ← Notification Service (separate, port 8087)
-│   ├── farm-kart-agent/                  ← AI Agent Service     (separate, port 8091)
+│   ├── notification/           ← Notification Service (separate, port 8087)
+│   ├── agent/                  ← AI Agent Service     (separate, port 8091)
 │   │
-│   ├── farm-kart-complex-migration-tracker/  ← Multi-step DB migrations (SQL+CQL+ES)
-│   └── farm-kart-elasticsearch-manager/      ← Elasticsearch index mappings
+│   ├── complex-migration-tracker/  ← Multi-step DB migrations (SQL+CQL+ES)
+│   └── elasticsearch-manager/      ← Elasticsearch index mappings
 │
 ├── farm-kart-ui/                         ← React frontend          (port 5173)
 ├── farm-kart-mcp/                        ← MCP server (TypeScript)
@@ -187,16 +192,16 @@ FARM_CART_MICROSERVICE/
 > Java build commands ab `microservice_boot/` ke andar chalte hain:
 > `cd microservice_boot && mvn clean package`
 
-Each domain is a **4-layer Maven sub-project** (module boundaries preserved after the merge):
+Each domain follows the Yagna-style **4-layer** layout (no `farm-kart-` prefix on folders):
 ```
-farm-kart-<service>/
-├── farm-kart-<service>-client/      DTOs, enums, request/response contracts
-├── farm-kart-<service>-repository/  JPA entities, repositories, Flyway migrations
-├── farm-kart-<service>-service/     Business logic, Kafka producers/consumers
-└── farm-kart-<service>-rest/        Controllers (plain jar; merged domains have no own main class)
+{service}/                         e.g. admin/, farmer/, marketplace/
+├── {service}-client/              DTOs, enums, request/response contracts
+├── {service}-repository/          JPA entities, repositories, Flyway migrations
+├── {service}-services/            Business logic, Kafka producers/consumers
+└── {service}-rest/                Controllers (plain jar; merged domains have no own main class)
 ```
 
-Only `farm-kart`, `farm-kart-notification` and `farm-kart-agent` produce runnable Spring Boot jars.
+Only `marketplace`, `notification` and `agent` produce runnable Spring Boot jars.
 
 ---
 
@@ -229,7 +234,7 @@ Only `farm-kart`, `farm-kart-notification` and `farm-kart-agent` produce runnabl
 
 ## Event-Driven Architecture (Kafka)
 
-All topics are centralised in `FkTopics.java` (`farm-kart-starter-common`).
+All topics are centralised in `FkTopics.java` (`starter-common`).
 
 ### Topic registry
 
@@ -255,7 +260,7 @@ farmkart.sheet.uploaded           farmkart.audit.log.created
 └─────────────┘                  └───────────────┘             └──────────────────┘
 ```
 
-- **Publish:** `DomainEventPublisher` in `farm-kart-starter-common` — called from service layer after DB save.
+- **Publish:** `DomainEventPublisher` in `starter-common` — called from service layer after DB save.
 - **Consume:** `@KafkaListener` in Admin (`PlatformAuditConsumer`) and Notification (`DomainNotificationConsumer`).
 - **Idempotency:** `processed_domain_events` table + `DurableEventGuard` prevents duplicate processing on Kafka retry.
 
@@ -313,8 +318,8 @@ Flyway settings (all services): `baseline-on-migrate`, `out-of-order`, `validate
 
 | Module | Purpose |
 |--------|---------|
-| `microservice_boot/farm-kart-complex-migration-tracker/` | Multi-step MySQL + Cassandra + Elasticsearch migrations |
-| `microservice_boot/farm-kart-elasticsearch-manager/` | Elasticsearch index templates (**not Solr**) |
+| `microservice_boot/complex-migration-tracker/` | Multi-step MySQL + Cassandra + Elasticsearch migrations |
+| `microservice_boot/elasticsearch-manager/` | Elasticsearch index templates (**not Solr**) |
 | `microservice_boot/{service}/{service}-rest/cassandra/migration/` | Per-service Cassandra CQL scripts |
 
 ---
@@ -350,7 +355,7 @@ Quick facts:
 
 - One required status check — **`Quality Gate`** (`.github/workflows/pr-checks.yml`) — aggregates build, tests, Checkstyle/PMD/SpotBugs, SonarCloud gate, Gitleaks, CodeQL, license compliance, OWASP and Docker builds. A red pipeline blocks the merge.
 - Branch protection for `main`/`develop` (2 approvals, code owners, up-to-date branch, no force push): `./scripts/setup-branch-protection.sh`
-- Images: `ghcr.io/<owner>/<repo>/{farm-kart-app, farm-kart-notification, farm-kart-agent}` tagged `sha-<sha>` (immutable), branch names and `latest`.
+- Images: `ghcr.io/<owner>/<repo>/{farm-kart-app, notification, agent}` tagged `sha-<sha>` (immutable), branch names and `latest`.
 - Deployments: `deploy-dev` (auto from `develop`), `deploy-qa` (manual), `deploy-stage` (auto from `main`), `deploy-prod` (manual + required reviewers + typed confirmation), `rollback` (manual, any env).
 
 ---
@@ -413,12 +418,12 @@ Every microservice uses `application.yml` (base) + profile-specific overrides:
 | `application.yml` | Shared defaults (all environments) |
 | `application-dev.yml` | Debug logging, Swagger enabled, console SMS, dev Kafka groups |
 | `application-prod.yml` | Swagger off, stricter Flyway, larger pools, secrets required |
-| `config/application-*-common.yml` | Shared profile rules in `farm-kart-starter-common` |
+| `config/application-*-common.yml` | Shared profile rules in `starter-common` |
 
 ```bash
 # Single service (JAR)
-java -jar farm-kart-rest.jar --spring.profiles.active=dev
-java -jar farm-kart-rest.jar --spring.profiles.active=prod
+java -jar marketplace-rest.jar --spring.profiles.active=dev
+java -jar marketplace-rest.jar --spring.profiles.active=prod
 
 # Docker
 SPRING_PROFILES_ACTIVE=prod docker compose up farm-kart-app
@@ -494,7 +499,7 @@ Bearer JWT
 ### Register a Master Admin
 
 ```http
-POST /farm-kart/api/v1/auth/register
+POST /marketplace/api/v1/auth/register
 Content-Type: application/json
 
 {
@@ -514,31 +519,31 @@ The token returned works on **every** endpoint (all domain APIs on :8080, plus n
 Authorization: Bearer <master_admin_token>
 
 # Vendor API
-GET /farm-kart/api/v1/vendors
+GET /marketplace/api/v1/vendors
 
 # Buyer API
-GET /farm-kart/api/v1/buyers/1
+GET /marketplace/api/v1/buyers/1
 
 # Warehouse booking
-POST /farm-kart/api/v1/warehouses/smart-book
+POST /marketplace/api/v1/warehouses/smart-book
 
 # Admin audit logs
-GET /farm-kart/api/v1/admin/audit-logs
+GET /marketplace/api/v1/admin/audit-logs
 
 # Farmer onboard
-POST /farm-kart/api/v1/farmers/onboard
+POST /marketplace/api/v1/farmers/onboard
 ```
 
 ### Implementation files
 
 | Component | Module / path |
 |---|---|
-| `FkUserRoleEnum` (7 roles + MASTER_ADMIN bypass flag) | `farm-kart-starter-common/.../enums/` |
-| `FkApiRoleRegistry` (path → allowed roles map) | `farm-kart-starter-common/.../security/` |
-| `FkRoleAuthorizationManager` (Master Admin bypass logic) | `farm-kart-common-rest/.../security/` |
-| `JwtAuthenticationFilter` (JWT → `FkUserPrincipal`) | `farm-kart-common-rest/.../security/` |
-| `FkSecurityAutoConfiguration` (shared `SecurityFilterChain`) | `farm-kart-common-rest/.../security/` |
-| `FkSecurityAutoConfiguration.imports` (auto-loads on all services) | `farm-kart-common-rest/resources/META-INF/spring/` |
+| `FkUserRoleEnum` (7 roles + MASTER_ADMIN bypass flag) | `starter-common/.../enums/` |
+| `FkApiRoleRegistry` (path → allowed roles map) | `starter-common/.../security/` |
+| `FkRoleAuthorizationManager` (Master Admin bypass logic) | `common-rest/.../security/` |
+| `JwtAuthenticationFilter` (JWT → `FkUserPrincipal`) | `common-rest/.../security/` |
+| `FkSecurityAutoConfiguration` (shared `SecurityFilterChain`) | `common-rest/.../security/` |
+| `FkSecurityAutoConfiguration.imports` (auto-loads on all services) | `common-rest/resources/META-INF/spring/` |
 
 > **Note:** The Farm Kart App, Notification and Agent services must share the same `JWT_SECRET` environment variable so the Master Admin token is accepted everywhere.
 

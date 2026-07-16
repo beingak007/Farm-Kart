@@ -4,19 +4,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.farmkart</groupId>
-        <artifactId>farm-kart-ai-advisory</artifactId>
+        <artifactId>ai-advisory</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-ai-advisory-rest</artifactId>
-    <name>farm-kart-ai-advisory-rest</name>
+    <artifactId>ai-advisory-rest</artifactId>
+    <name>ai-advisory-rest</name>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-ai-advisory-service</artifactId>
+            <artifactId>ai-advisory-services</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-common-rest</artifactId>
+            <artifactId>common-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>

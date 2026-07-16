@@ -4,19 +4,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.farmkart</groupId>
-        <artifactId>farm-kart-admin</artifactId>
+        <artifactId>admin</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-admin-rest</artifactId>
-    <name>farm-kart-admin-rest</name>
+    <artifactId>admin-rest</artifactId>
+    <name>admin-rest</name>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-admin-service</artifactId>
+            <artifactId>admin-services</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-common-rest</artifactId>
+            <artifactId>common-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>

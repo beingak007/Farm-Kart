@@ -8,12 +8,12 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-framework</artifactId>
+    <artifactId>framework</artifactId>
     <packaging>pom</packaging>
-    <name>farm-kart-framework</name>
+    <name>framework</name>
     <modules>
-        <module>farm-kart-framework-client</module>
-        <module>farm-kart-framework-repository</module>
-        <module>farm-kart-framework-service</module>
+        <module>framework-client</module>
+        <module>framework-repository</module>
+        <module>framework-services</module>
     </modules>
 </project>

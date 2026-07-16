@@ -68,9 +68,9 @@ jobs:
           # Only the 3 deployables produce runnable Spring Boot jars
           # (artifact paths are workspace-relative, hence the prefix)
           path: |
-            microservice_boot/farm-kart/farm-kart-rest/target/farm-kart-rest-*.jar
-            microservice_boot/farm-kart-notification/farm-kart-notification-rest/target/farm-kart-notification-rest-*.jar
-            microservice_boot/farm-kart-agent/farm-kart-agent-rest/target/farm-kart-agent-rest-*.jar
+            microservice_boot/marketplace/marketplace-rest/target/marketplace-rest-*.jar
+            microservice_boot/notification/notification-rest/target/notification-rest-*.jar
+            microservice_boot/agent/agent-rest/target/agent-rest-*.jar
             !**/original-*.jar
           retention-days: 14
           if-no-files-found: error

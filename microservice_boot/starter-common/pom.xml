@@ -8,8 +8,8 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-starter-common</artifactId>
-    <name>farm-kart-starter-common</name>
+    <artifactId>starter-common</artifactId>
+    <name>starter-common</name>
     <description>Shared starter utilities and auto-configuration</description>
     <dependencies>
         <dependency>

@@ -5,19 +5,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.farmkart</groupId>
-        <artifactId>farm-kart-farmer</artifactId>
+        <artifactId>farmer</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-farmer-service</artifactId>
-    <name>farm-kart-farmer-service</name>
+    <artifactId>farmer-services</artifactId>
+    <name>farmer-services</name>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-farmer-repository</artifactId>
+            <artifactId>farmer-repository</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-starter-common</artifactId>
+            <artifactId>starter-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>

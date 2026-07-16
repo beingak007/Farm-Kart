@@ -7,13 +7,13 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-reporting</artifactId>
+    <artifactId>reporting</artifactId>
     <packaging>pom</packaging>
-    <name>farm-kart-reporting</name>
+    <name>reporting</name>
     <modules>
-        <module>farm-kart-reporting-client</module>
-        <module>farm-kart-reporting-repository</module>
-        <module>farm-kart-reporting-service</module>
-        <module>farm-kart-reporting-rest</module>
+        <module>reporting-client</module>
+        <module>reporting-repository</module>
+        <module>reporting-services</module>
+        <module>reporting-rest</module>
     </modules>
 </project>

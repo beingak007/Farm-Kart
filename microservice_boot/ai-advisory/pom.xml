@@ -7,13 +7,13 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-ai-advisory</artifactId>
+    <artifactId>ai-advisory</artifactId>
     <packaging>pom</packaging>
-    <name>farm-kart-ai-advisory</name>
+    <name>ai-advisory</name>
     <modules>
-        <module>farm-kart-ai-advisory-client</module>
-        <module>farm-kart-ai-advisory-repository</module>
-        <module>farm-kart-ai-advisory-service</module>
-        <module>farm-kart-ai-advisory-rest</module>
+        <module>ai-advisory-client</module>
+        <module>ai-advisory-repository</module>
+        <module>ai-advisory-services</module>
+        <module>ai-advisory-rest</module>
     </modules>
 </project>

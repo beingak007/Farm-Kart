@@ -7,14 +7,14 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-warehouse</artifactId>
+    <artifactId>warehouse</artifactId>
     <packaging>pom</packaging>
-    <name>farm-kart-warehouse</name>
+    <name>warehouse</name>
     <description>Warehouse Service — storage and cold-storage booking</description>
     <modules>
-        <module>farm-kart-warehouse-client</module>
-        <module>farm-kart-warehouse-repository</module>
-        <module>farm-kart-warehouse-service</module>
-        <module>farm-kart-warehouse-rest</module>
+        <module>warehouse-client</module>
+        <module>warehouse-repository</module>
+        <module>warehouse-services</module>
+        <module>warehouse-rest</module>
     </modules>
 </project>

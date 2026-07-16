@@ -4,19 +4,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.farmkart</groupId>
-        <artifactId>farm-kart-buyer</artifactId>
+        <artifactId>buyer</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-buyer-rest</artifactId>
-    <name>farm-kart-buyer-rest</name>
+    <artifactId>buyer-rest</artifactId>
+    <name>buyer-rest</name>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-buyer-service</artifactId>
+            <artifactId>buyer-services</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-common-rest</artifactId>
+            <artifactId>common-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>

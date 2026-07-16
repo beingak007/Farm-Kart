@@ -4,19 +4,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.farmkart</groupId>
-        <artifactId>farm-kart-warehouse</artifactId>
+        <artifactId>warehouse</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-warehouse-rest</artifactId>
-    <name>farm-kart-warehouse-rest</name>
+    <artifactId>warehouse-rest</artifactId>
+    <name>warehouse-rest</name>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-warehouse-service</artifactId>
+            <artifactId>warehouse-services</artifactId>
         </dependency>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-common-rest</artifactId>
+            <artifactId>common-rest</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>

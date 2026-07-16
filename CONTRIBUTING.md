@@ -68,7 +68,7 @@ cd microservice_boot
 mvn clean install -DskipTests
 
 # Run the main app directly
-cd microservice_boot/farm-kart/farm-kart-rest
+cd microservice_boot/marketplace/marketplace-rest
 mvn spring-boot:run
 ```
 

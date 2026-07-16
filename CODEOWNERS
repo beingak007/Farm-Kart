@@ -23,32 +23,32 @@
 # -------------------------------------------------------
 
 # Shared / Framework modules
-/microservice_boot/farm-kart-starter-common/    @beingakstyle
-/microservice_boot/farm-kart-common-rest/       @beingakstyle
-/microservice_boot/farm-kart-framework/         @beingakstyle
+/microservice_boot/starter-common/    @beingakstyle
+/microservice_boot/common-rest/       @beingakstyle
+/microservice_boot/framework/         @beingakstyle
 
 # Core Marketplace Service (merged monolith)
-/microservice_boot/farm-kart/                   @beingakstyle
+/microservice_boot/marketplace/                   @beingakstyle
 
 # Domain modules
-/microservice_boot/farm-kart-farmer/            @beingakstyle
-/microservice_boot/farm-kart-buyer/             @beingakstyle
-/microservice_boot/farm-kart-product-catalog/   @beingakstyle
-/microservice_boot/farm-kart-logistics/         @beingakstyle
-/microservice_boot/farm-kart-warehouse/         @beingakstyle
-/microservice_boot/farm-kart-market-price/      @beingakstyle
-/microservice_boot/farm-kart-notification/      @beingakstyle
-/microservice_boot/farm-kart-admin/             @beingakstyle
-/microservice_boot/farm-kart-reporting/         @beingakstyle
+/microservice_boot/farmer/            @beingakstyle
+/microservice_boot/buyer/             @beingakstyle
+/microservice_boot/product-catalog/   @beingakstyle
+/microservice_boot/logistics/         @beingakstyle
+/microservice_boot/warehouse/         @beingakstyle
+/microservice_boot/market-price/      @beingakstyle
+/microservice_boot/notification/      @beingakstyle
+/microservice_boot/admin/             @beingakstyle
+/microservice_boot/reporting/         @beingakstyle
 
 # AI / Agent / Advisory
-/microservice_boot/farm-kart-ai-advisory/       @beingakstyle
-/microservice_boot/farm-kart-agent/             @beingakstyle
+/microservice_boot/ai-advisory/       @beingakstyle
+/microservice_boot/agent/             @beingakstyle
 /farm-kart-mcp/                     @beingakstyle
 
 # Migration modules
-/microservice_boot/farm-kart-complex-migration-tracker/  @beingakstyle
-/microservice_boot/farm-kart-elasticsearch-manager/      @beingakstyle
+/microservice_boot/complex-migration-tracker/  @beingakstyle
+/microservice_boot/elasticsearch-manager/      @beingakstyle
 
 # -------------------------------------------------------
 # Frontend

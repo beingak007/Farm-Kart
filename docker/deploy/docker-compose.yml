@@ -31,8 +31,8 @@ services:
       retries: 5
       start_period: 90s
 
-  farm-kart-notification:
-    image: ghcr.io/<owner>/<repo>/farm-kart-notification:${IMAGE_TAG}
+  notification:
+    image: ghcr.io/<owner>/<repo>/notification:${IMAGE_TAG}
     restart: unless-stopped
     ports:
       - "8087:8087"
@@ -44,8 +44,8 @@ services:
       retries: 5
       start_period: 60s
 
-  farm-kart-agent:
-    image: ghcr.io/<owner>/<repo>/farm-kart-agent:${IMAGE_TAG}
+  agent:
+    image: ghcr.io/<owner>/<repo>/agent:${IMAGE_TAG}
     restart: unless-stopped
     ports:
       - "8091:8091"

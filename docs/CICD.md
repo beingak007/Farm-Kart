@@ -2,7 +2,7 @@
 
 Enterprise-grade GitHub Actions pipeline for the Farm Kart platform
 (Java 21 · Spring Boot 3.3 · Maven multi-module · 3 deployables:
-`farm-kart-app` :8080, `farm-kart-notification` :8087, `farm-kart-agent` :8091).
+`farm-kart-app` :8080, `notification` :8087, `agent` :8091).
 
 All Java code lives under **`microservice_boot/`** — that folder is the Maven
 reactor root, so every `mvn` step in the workflows runs with
@@ -186,7 +186,7 @@ Merge conflicts are inherently blocked by GitHub (a conflicted PR has no merge b
 
 ## 8. Docker image strategy
 
-Images (GHCR): `ghcr.io/<owner>/<repo>/{farm-kart-app, farm-kart-notification, farm-kart-agent}`
+Images (GHCR): `ghcr.io/<owner>/<repo>/{farm-kart-app, notification, agent}`
 
 | Tag | When | Use |
 |---|---|---|

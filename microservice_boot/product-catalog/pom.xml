@@ -7,13 +7,13 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-product-catalog</artifactId>
+    <artifactId>product-catalog</artifactId>
     <packaging>pom</packaging>
-    <name>farm-kart-product-catalog</name>
+    <name>product-catalog</name>
     <modules>
-        <module>farm-kart-product-catalog-client</module>
-        <module>farm-kart-product-catalog-repository</module>
-        <module>farm-kart-product-catalog-service</module>
-        <module>farm-kart-product-catalog-rest</module>
+        <module>product-catalog-client</module>
+        <module>product-catalog-repository</module>
+        <module>product-catalog-services</module>
+        <module>product-catalog-rest</module>
     </modules>
 </project>

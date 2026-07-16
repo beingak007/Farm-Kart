@@ -4,15 +4,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.farmkart</groupId>
-        <artifactId>farm-kart-market-price</artifactId>
+        <artifactId>market-price</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-market-price-repository</artifactId>
-    <name>farm-kart-market-price-repository</name>
+    <artifactId>market-price-repository</artifactId>
+    <name>market-price-repository</name>
     <dependencies>
         <dependency>
             <groupId>com.farmkart</groupId>
-            <artifactId>farm-kart-market-price-client</artifactId>
+            <artifactId>market-price-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

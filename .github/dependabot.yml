@@ -127,9 +127,9 @@ updates:
   # ── Docker (Dockerfiles of the 3 deployables) ──────────────
   - package-ecosystem: "docker"
     directories:
-      - "/microservice_boot/farm-kart"
-      - "/microservice_boot/farm-kart-notification"
-      - "/microservice_boot/farm-kart-agent"
+      - "/microservice_boot/marketplace"
+      - "/microservice_boot/notification"
+      - "/microservice_boot/agent"
     schedule:
       interval: "monthly"
       day: "monday"

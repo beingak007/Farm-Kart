@@ -15,7 +15,7 @@ body:
     attributes:
       label: Affected Microservice
       description: Which microservice is affected?
-      placeholder: "e.g., farm-kart-farmer, farm-kart-buyer, farm-kart-logistics"
+      placeholder: "e.g., farmer, buyer, logistics"
     validations:
       required: true
 

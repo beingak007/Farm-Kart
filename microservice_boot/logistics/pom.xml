@@ -7,14 +7,14 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-logistics</artifactId>
+    <artifactId>logistics</artifactId>
     <packaging>pom</packaging>
-    <name>farm-kart-logistics</name>
+    <name>logistics</name>
     <description>Logistics Service — shipment creation and delivery tracking</description>
     <modules>
-        <module>farm-kart-logistics-client</module>
-        <module>farm-kart-logistics-repository</module>
-        <module>farm-kart-logistics-service</module>
-        <module>farm-kart-logistics-rest</module>
+        <module>logistics-client</module>
+        <module>logistics-repository</module>
+        <module>logistics-services</module>
+        <module>logistics-rest</module>
     </modules>
 </project>

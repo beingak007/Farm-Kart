@@ -17,17 +17,17 @@ body:
       description: Which service should this feature be added to?
       options:
         - farm-kart (Core Marketplace)
-        - farm-kart-farmer
-        - farm-kart-buyer
-        - farm-kart-product-catalog
-        - farm-kart-logistics
-        - farm-kart-warehouse
-        - farm-kart-market-price
-        - farm-kart-notification
-        - farm-kart-admin
-        - farm-kart-reporting
-        - farm-kart-ai-advisory
-        - farm-kart-agent (AI Agent)
+        - farmer
+        - buyer
+        - product-catalog
+        - logistics
+        - warehouse
+        - market-price
+        - notification
+        - admin
+        - reporting
+        - ai-advisory
+        - agent (AI Agent)
         - farm-kart-ui (Frontend)
         - New service / Cross-cutting
     validations:

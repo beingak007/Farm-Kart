@@ -20,24 +20,24 @@
 
     <modules>
         <!-- Foundation -->
-        <module>farm-kart-starter-common</module>
-        <module>farm-kart-common-rest</module>
-        <module>farm-kart-framework</module>
+        <module>starter-common</module>
+        <module>common-rest</module>
+        <module>framework</module>
         <!-- Core marketplace service -->
-        <module>farm-kart</module>
+        <module>marketplace</module>
         <!-- Domain microservices -->
-        <module>farm-kart-farmer</module>
-        <module>farm-kart-buyer</module>
-        <module>farm-kart-product-catalog</module>
-        <module>farm-kart-logistics</module>
-        <module>farm-kart-warehouse</module>
-        <module>farm-kart-market-price</module>
-        <module>farm-kart-notification</module>
-        <module>farm-kart-admin</module>
-        <module>farm-kart-reporting</module>
-        <module>farm-kart-ai-advisory</module>
+        <module>farmer</module>
+        <module>buyer</module>
+        <module>product-catalog</module>
+        <module>logistics</module>
+        <module>warehouse</module>
+        <module>market-price</module>
+        <module>notification</module>
+        <module>admin</module>
+        <module>reporting</module>
+        <module>ai-advisory</module>
         <!-- AI Agent + MCP -->
-        <module>farm-kart-agent</module>
+        <module>agent</module>
     </modules>
 
     <properties>
@@ -106,263 +106,263 @@
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-starter-common</artifactId>
+                <artifactId>starter-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-common-rest</artifactId>
+                <artifactId>common-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-framework-client</artifactId>
+                <artifactId>framework-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-framework-repository</artifactId>
+                <artifactId>framework-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-framework-service</artifactId>
+                <artifactId>framework-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-client</artifactId>
+                <artifactId>marketplace-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-repository</artifactId>
+                <artifactId>marketplace-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-service</artifactId>
+                <artifactId>marketplace-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Farmer service -->
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-farmer-client</artifactId>
+                <artifactId>farmer-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-farmer-rest</artifactId>
+                <artifactId>farmer-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-farmer-repository</artifactId>
+                <artifactId>farmer-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-farmer-service</artifactId>
+                <artifactId>farmer-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Buyer service -->
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-buyer-client</artifactId>
+                <artifactId>buyer-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-buyer-repository</artifactId>
+                <artifactId>buyer-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-buyer-service</artifactId>
+                <artifactId>buyer-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-buyer-rest</artifactId>
+                <artifactId>buyer-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Logistics service -->
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-logistics-client</artifactId>
+                <artifactId>logistics-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-logistics-repository</artifactId>
+                <artifactId>logistics-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-logistics-service</artifactId>
+                <artifactId>logistics-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-logistics-rest</artifactId>
+                <artifactId>logistics-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Warehouse service -->
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-warehouse-client</artifactId>
+                <artifactId>warehouse-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-warehouse-repository</artifactId>
+                <artifactId>warehouse-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-warehouse-service</artifactId>
+                <artifactId>warehouse-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-warehouse-rest</artifactId>
+                <artifactId>warehouse-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Market Price service -->
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-market-price-client</artifactId>
+                <artifactId>market-price-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-market-price-repository</artifactId>
+                <artifactId>market-price-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-market-price-service</artifactId>
+                <artifactId>market-price-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-market-price-rest</artifactId>
+                <artifactId>market-price-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Product Catalog service -->
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-product-catalog-client</artifactId>
+                <artifactId>product-catalog-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-product-catalog-repository</artifactId>
+                <artifactId>product-catalog-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-product-catalog-service</artifactId>
+                <artifactId>product-catalog-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-product-catalog-rest</artifactId>
+                <artifactId>product-catalog-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Notification service -->
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-notification-client</artifactId>
+                <artifactId>notification-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-notification-repository</artifactId>
+                <artifactId>notification-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-notification-service</artifactId>
+                <artifactId>notification-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Reporting service -->
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-reporting-client</artifactId>
+                <artifactId>reporting-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-reporting-repository</artifactId>
+                <artifactId>reporting-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-reporting-service</artifactId>
+                <artifactId>reporting-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-reporting-rest</artifactId>
+                <artifactId>reporting-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- AI Advisory service -->
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-ai-advisory-client</artifactId>
+                <artifactId>ai-advisory-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-ai-advisory-repository</artifactId>
+                <artifactId>ai-advisory-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-ai-advisory-service</artifactId>
+                <artifactId>ai-advisory-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-ai-advisory-rest</artifactId>
+                <artifactId>ai-advisory-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Admin service -->
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-admin-client</artifactId>
+                <artifactId>admin-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-admin-repository</artifactId>
+                <artifactId>admin-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-admin-service</artifactId>
+                <artifactId>admin-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-admin-rest</artifactId>
+                <artifactId>admin-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <!-- Agent service -->
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-agent-client</artifactId>
+                <artifactId>agent-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-agent-repository</artifactId>
+                <artifactId>agent-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.farmkart</groupId>
-                <artifactId>farm-kart-agent-service</artifactId>
+                <artifactId>agent-services</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

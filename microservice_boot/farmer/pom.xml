@@ -8,14 +8,14 @@
         <artifactId>farm-kart-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>farm-kart-farmer</artifactId>
+    <artifactId>farmer</artifactId>
     <packaging>pom</packaging>
-    <name>farm-kart-farmer</name>
+    <name>farmer</name>
     <description>Farmer Service — farmer profiles, farm details, crop management</description>
     <modules>
-        <module>farm-kart-farmer-client</module>
-        <module>farm-kart-farmer-repository</module>
-        <module>farm-kart-farmer-service</module>
-        <module>farm-kart-farmer-rest</module>
+        <module>farmer-client</module>
+        <module>farmer-repository</module>
+        <module>farmer-services</module>
+        <module>farmer-rest</module>
     </modules>
 </project>

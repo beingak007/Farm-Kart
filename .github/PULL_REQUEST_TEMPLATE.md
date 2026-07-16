@@ -31,19 +31,19 @@ Fixes # <!-- Issue number, e.g., Fixes #123 -->
 
 <!-- List the microservices modified by this PR. -->
 
-- [ ] farm-kart (Core)
-- [ ] farm-kart-farmer
-- [ ] farm-kart-buyer
-- [ ] farm-kart-product-catalog
-- [ ] farm-kart-logistics
-- [ ] farm-kart-warehouse
-- [ ] farm-kart-market-price
-- [ ] farm-kart-notification
-- [ ] farm-kart-admin
-- [ ] farm-kart-reporting
-- [ ] farm-kart-ai-advisory
-- [ ] farm-kart-agent
-- [ ] farm-kart-starter-common / farm-kart-framework (Shared)
+- [ ] marketplace (Core app)
+- [ ] farmer
+- [ ] buyer
+- [ ] product-catalog
+- [ ] logistics
+- [ ] warehouse
+- [ ] market-price
+- [ ] notification
+- [ ] admin
+- [ ] reporting
+- [ ] ai-advisory
+- [ ] agent
+- [ ] starter-common / common-rest / framework (Shared)
 - [ ] farm-kart-ui (Frontend)
 - [ ] Infrastructure / CI
 
