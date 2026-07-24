@@ -1,0 +1,29 @@
+# Shared prod profile — imported by every microservice (application-prod.yml)
+logging:
+  level:
+    root: WARN
+    com.farmkart: INFO
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+server:
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+farmkart:
+  env: prod

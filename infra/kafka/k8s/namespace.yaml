@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: farmkart-kafka
+  labels:
+    app.kubernetes.io/part-of: farmkart
+    app.kubernetes.io/component: messaging

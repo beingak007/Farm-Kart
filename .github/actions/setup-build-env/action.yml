@@ -1,0 +1,36 @@
+# ============================================================
+# Composite Action — Setup Build Environment
+#
+# WHY: Every workflow needs the exact same Java + Maven cache
+# setup. Centralising it here means one place to bump the Java
+# version and zero duplicated YAML across workflows.
+#
+# Usage:
+#   - uses: ./.github/actions/setup-build-env
+# ============================================================
+name: "Setup Build Environment"
+description: "Sets up Temurin Java 21 and caches the local Maven repository"
+
+inputs:
+  java-version:
+    description: "JDK version to install"
+    required: false
+    default: "21"
+
+runs:
+  using: "composite"
+  steps:
+    # setup-java's built-in `cache: maven` keys the cache on **/pom.xml
+    # hashes, so a dependency bump invalidates the cache automatically.
+    - name: Set up Java ${{ inputs.java-version }} (Temurin)
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: temurin
+        cache: maven
+
+    - name: Print toolchain versions
+      shell: bash
+      run: |
+        java -version
+        mvn --version

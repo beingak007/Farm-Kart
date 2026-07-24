@@ -1,0 +1,51 @@
+# ============================================================
+# Deploy — DEV
+# Trigger: automatic on every push to develop (after images are
+# pushed by pr-checks → docker), or manual with a specific tag.
+# ============================================================
+name: Deploy Dev
+
+on:
+  workflow_run:
+    workflows: ["PR Checks"]
+    branches: [develop]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      image-tag:
+        description: "Image tag to deploy (default: sha of current develop HEAD)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  resolve-tag:
+    name: Resolve image tag
+    runs-on: ubuntu-latest
+    # Only deploy when CI on develop actually succeeded.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Compute tag
+        id: tag
+        run: |
+          if [ -n "${{ github.event.inputs.image-tag }}" ]; then
+            echo "tag=${{ github.event.inputs.image-tag }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "tag=sha-${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=sha-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    name: Dev
+    needs: [resolve-tag]
+    uses: ./.github/workflows/_deploy.yml
+    secrets: inherit
+    with:
+      environment: dev
+      image-tag: ${{ needs.resolve-tag.outputs.tag }}

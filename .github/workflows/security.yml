@@ -1,0 +1,111 @@
+# ============================================================
+# Reusable Workflow — Security Scans
+#
+# Three independent, parallel security jobs:
+#
+#   1. secret-scan       — Gitleaks scans the full git history for
+#                          committed credentials (API keys, tokens,
+#                          private keys, passwords).
+#   2. dependency-review — GitHub's Dependency Review flags newly
+#                          introduced vulnerable dependencies AND
+#                          enforces license compliance on PRs.
+#   3. codeql            — GitHub CodeQL semantic analysis (SAST)
+#                          for Java; results land in the repo's
+#                          Security tab.
+#
+# NOTE: also enable the built-in GitHub features (free for public
+# repos) under Settings → Code security:
+#   - Secret scanning + Push protection
+#   - Dependabot alerts (dependabot.yml is already configured)
+# ============================================================
+name: Security
+
+on:
+  workflow_call:
+    inputs:
+      run-codeql:
+        description: "Run CodeQL SAST (slow — skip on draft PRs)"
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+  security-events: write   # CodeQL uploads SARIF results
+  pull-requests: read      # dependency-review reads the PR diff
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  # Secret scanning — full history, so an accidentally committed
+  # and later "deleted" secret is still caught.
+  # ──────────────────────────────────────────────────────────
+  secret-scan:
+    name: Secret Scan (Gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout source (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ──────────────────────────────────────────────────────────
+  # Dependency review + license compliance (PR events only —
+  # the action diffs the PR's dependency changes).
+  # ──────────────────────────────────────────────────────────
+  dependency-review:
+    name: Dependency Review + License Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          # License compliance: block copyleft licenses that would
+          # contaminate this Apache-2.0 codebase.
+          deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-2.1, LGPL-3.0
+          comment-summary-in-pr: on-failure
+
+  # ──────────────────────────────────────────────────────────
+  # CodeQL SAST for Java
+  # ──────────────────────────────────────────────────────────
+  codeql:
+    name: CodeQL (Java SAST)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    if: inputs.run-codeql
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java
+          queries: security-and-quality
+
+      # CodeQL for Java needs a real build to trace compilation.
+      - name: Build for CodeQL
+        working-directory: microservice_boot
+        run: >
+          mvn clean package
+          --batch-mode --no-transfer-progress
+          -DskipTests
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:java"

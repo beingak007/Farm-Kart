@@ -6,7 +6,7 @@ React + Vite frontend with GSAP-animated login and sheet upload.
 
 ```bash
 # Backend (separate terminal)
-mvn -pl farm-kart/farm-kart-rest spring-boot:run -Dspring-boot.run.profiles=dev
+mvn -pl marketplace/marketplace-rest spring-boot:run -Dspring-boot.run.profiles=dev
 
 # Frontend
 cd farm-kart-ui

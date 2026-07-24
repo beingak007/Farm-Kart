@@ -1,0 +1,157 @@
+# ============================================================
+# Reusable Workflow — Deploy (shared by dev / qa / stage / prod)
+#
+# Strategy: SSH to the target host, pull the immutable
+# `sha-<sha>` images from GHCR, restart via docker compose,
+# then VERIFY the deployment:
+#   1. Health check     GET /farm-kart/actuator/health
+#   2. Liveness check   GET /farm-kart/actuator/health/liveness
+#   3. Readiness check  GET /farm-kart/actuator/health/readiness
+#
+# If verification fails → AUTOMATIC ROLLBACK to the previously
+# recorded tag + failure notifications (email/Slack/Teams).
+#
+# Approvals: the `environment:` key binds the job to a GitHub
+# Environment. The `production` environment is configured with
+# Required Reviewers → the job PAUSES until a human approves.
+#
+# Per-environment secrets (Settings → Environments → <env>):
+#   DEPLOY_HOST     — server IP/DNS
+#   DEPLOY_USER     — ssh user
+#   DEPLOY_SSH_KEY  — private key (PEM)
+#   APP_BASE_URL (variable, not secret) — public base URL, e.g. https://dev.farmkart.com
+#
+# Server prerequisites (one-time):
+#   /opt/farmkart/docker-compose.yml referencing
+#   ${IMAGE_TAG} for the 3 farm-kart images, and a
+#   /opt/farmkart/.deployed_tag file tracking the live tag.
+# ============================================================
+name: Deploy (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "GitHub Environment: dev | qa | stage | production"
+        type: string
+        required: true
+      image-tag:
+        description: "Image tag to deploy (e.g. sha-<full-sha> or latest)"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    name: "Deploy → ${{ inputs.environment }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Binds to the GitHub Environment: pulls env-scoped secrets and
+    # enforces protection rules (required reviewers on production).
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ vars.APP_BASE_URL }}
+
+    steps:
+      - name: Checkout source (for scripts)
+        uses: actions/checkout@v4
+
+      - name: Deploy ${{ inputs.image-tag }} to ${{ inputs.environment }}
+        id: deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd /opt/farmkart
+
+            # Remember the currently live tag for automatic rollback
+            PREVIOUS_TAG=$(cat .deployed_tag 2>/dev/null || echo "")
+            echo "Previous tag: ${PREVIOUS_TAG:-<none>}"
+            echo "${PREVIOUS_TAG}" > .previous_tag
+
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            export IMAGE_TAG="${{ inputs.image-tag }}"
+            docker compose pull
+            docker compose up -d --remove-orphans
+
+            echo "${IMAGE_TAG}" > .deployed_tag
+            echo "Deployed ${IMAGE_TAG}"
+
+      # ── Deployment verification (health/liveness/readiness) ──
+      - name: Verify deployment (health + liveness + readiness)
+        id: verify
+        run: |
+          BASE="${{ vars.APP_BASE_URL }}"
+          check() {
+            local name="$1" url="$2"
+            echo "Checking ${name}: ${url}"
+            for i in $(seq 1 30); do
+              if curl -sf --max-time 5 "$url" | grep -q '"status":"UP"'; then
+                echo "✅ ${name} OK"
+                return 0
+              fi
+              echo "  attempt $i/30 — not ready, retrying in 10s"
+              sleep 10
+            done
+            echo "::error::${name} FAILED after 5 minutes"
+            return 1
+          }
+          check "Health"    "${BASE}/farm-kart/actuator/health"
+          check "Liveness"  "${BASE}/farm-kart/actuator/health/liveness"
+          check "Readiness" "${BASE}/farm-kart/actuator/health/readiness"
+
+      # ── Automatic rollback when verification fails ────────
+      - name: Rollback to previous version
+        if: failure() && steps.deploy.outcome == 'success'
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd /opt/farmkart
+            PREVIOUS_TAG=$(cat .previous_tag 2>/dev/null || echo "")
+            if [ -z "$PREVIOUS_TAG" ]; then
+              echo "::error::No previous tag recorded — manual intervention required"
+              exit 1
+            fi
+            echo "Rolling back to ${PREVIOUS_TAG}"
+            export IMAGE_TAG="${PREVIOUS_TAG}"
+            docker compose pull
+            docker compose up -d --remove-orphans
+            echo "${PREVIOUS_TAG}" > .deployed_tag
+            echo "Rollback to ${PREVIOUS_TAG} complete"
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          {
+            echo "## Deployment — ${{ inputs.environment }}"
+            echo ""
+            echo "| Field | Value |"
+            echo "|---|---|"
+            echo "| Image tag | \`${{ inputs.image-tag }}\` |"
+            echo "| Verification | ${{ steps.verify.outcome == 'success' && '✅ Healthy' || '❌ Failed (auto-rollback attempted)' }} |"
+            echo "| Deployed by | ${{ github.actor }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Failure notifications reuse the same channel fan-out as CI.
+  notify-on-failure:
+    name: Notify
+    if: always() && needs.deploy.result == 'failure'
+    needs: [deploy]
+    uses: ./.github/workflows/notify.yml
+    secrets: inherit
+    with:
+      status: failure
+      failed-jobs: "Deployment to ${{ inputs.environment }} (auto-rollback attempted)"

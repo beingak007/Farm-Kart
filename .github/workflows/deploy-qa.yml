@@ -1,0 +1,25 @@
+# ============================================================
+# Deploy — QA
+# Trigger: manual (QA pulls a build when they are ready to test).
+# ============================================================
+name: Deploy QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      image-tag:
+        description: "Image tag to deploy (e.g. sha-<full-sha>)"
+        required: true
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    name: QA
+    uses: ./.github/workflows/_deploy.yml
+    secrets: inherit
+    with:
+      environment: qa
+      image-tag: ${{ github.event.inputs.image-tag }}

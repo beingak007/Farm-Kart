@@ -1,0 +1,50 @@
+# ============================================================
+# Deploy — STAGE
+# Trigger: automatic on push to main (release candidate), or
+# manual with a specific tag.
+# ============================================================
+name: Deploy Stage
+
+on:
+  workflow_run:
+    workflows: ["PR Checks"]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      image-tag:
+        description: "Image tag to deploy (e.g. sha-<full-sha>)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  resolve-tag:
+    name: Resolve image tag
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Compute tag
+        id: tag
+        run: |
+          if [ -n "${{ github.event.inputs.image-tag }}" ]; then
+            echo "tag=${{ github.event.inputs.image-tag }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "tag=sha-${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=sha-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    name: Stage
+    needs: [resolve-tag]
+    uses: ./.github/workflows/_deploy.yml
+    secrets: inherit
+    with:
+      environment: stage
+      image-tag: ${{ needs.resolve-tag.outputs.tag }}

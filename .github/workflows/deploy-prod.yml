@@ -1,0 +1,52 @@
+# ============================================================
+# Deploy — PRODUCTION
+#
+# Trigger: MANUAL ONLY (workflow_dispatch), and additionally the
+# `production` GitHub Environment must be configured with
+# Required Reviewers — so the deploy job pauses for human
+# approval even after being dispatched.
+#
+# Recommended flow:
+#   1. Tag verified on stage  →  2. Dispatch this workflow with
+#   the same sha-tag  →  3. Approver approves  →  4. Deploy +
+#   health verification (+ auto-rollback if unhealthy).
+# ============================================================
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      image-tag:
+        description: "Image tag verified on stage (e.g. sha-<full-sha>)"
+        required: true
+      confirm:
+        description: "Type 'deploy-to-production' to confirm"
+        required: true
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  # Double confirmation: typed phrase + environment reviewers.
+  guard:
+    name: Confirmation guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate confirmation phrase
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "deploy-to-production" ]; then
+            echo "::error::Confirmation phrase mismatch — type 'deploy-to-production' to proceed"
+            exit 1
+          fi
+
+  deploy:
+    name: Production
+    needs: [guard]
+    # `production` environment enforces manual approval (Required
+    # Reviewers) before this job starts.
+    uses: ./.github/workflows/_deploy.yml
+    secrets: inherit
+    with:
+      environment: production
+      image-tag: ${{ github.event.inputs.image-tag }}

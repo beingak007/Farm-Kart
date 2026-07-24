@@ -1,0 +1,103 @@
+# ============================================================
+# Reusable Workflow — Tests & Coverage & Static Analysis
+#
+# Responsibilities:
+#   - Unit tests (Surefire) + Integration tests (Failsafe, if any)
+#   - JaCoCo coverage report (fed into SonarCloud by sonar.yml)
+#   - Static analysis: Checkstyle + PMD + SpotBugs (Maven
+#     `quality` profile defined in the root pom.xml — thresholds
+#     live there: Checkstyle warning severity, SpotBugs Medium+,
+#     PMD priority 3+ all FAIL the build)
+#   - Publish JUnit results as a GitHub check + upload reports
+#
+# WHY tests and static analysis in one workflow: both need the
+# compiled classes, so they share one `mvn verify` invocation
+# instead of compiling the reactor twice.
+# ============================================================
+name: Test
+
+on:
+  workflow_call:
+    inputs:
+      run-quality-profile:
+        description: "Also run Checkstyle/PMD/SpotBugs (-P quality)"
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+  checks: write         # dorny/test-reporter creates a check run
+
+env:
+  MAVEN_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
+
+jobs:
+  test:
+    name: Unit + Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: microservice_boot
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: ./.github/actions/setup-build-env
+
+      # `verify` runs: compile → Surefire (unit) → JaCoCo report →
+      # Failsafe (integration, *IT.java) → JaCoCo check → quality plugins.
+      # The quality profile activates Checkstyle/SpotBugs/PMD from the
+      # root pom's pluginManagement — violations FAIL this job.
+      - name: Run tests + static analysis (mvn verify)
+        run: >
+          mvn verify
+          --batch-mode --no-transfer-progress
+          ${{ inputs.run-quality-profile && '-P quality' || '' }}
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Publish JUnit test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Test Results
+          path: "**/target/surefire-reports/*.xml,**/target/failsafe-reports/*.xml"
+          reporter: java-junit
+          fail-on-error: false
+
+      # JaCoCo XML is consumed by SonarCloud; HTML is for humans.
+      - name: Upload coverage reports (JaCoCo)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jacoco-reports-${{ github.sha }}
+          path: "**/target/site/jacoco/"
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Upload static analysis reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: static-analysis-reports-${{ github.sha }}
+          path: |
+            **/target/spotbugsXml.xml
+            **/target/pmd.xml
+            **/target/checkstyle-result.xml
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports-${{ github.sha }}
+          path: |
+            **/target/surefire-reports/
+            **/target/failsafe-reports/
+          retention-days: 14
+          if-no-files-found: warn

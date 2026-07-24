@@ -1,0 +1,25 @@
+# Provectus Kafka UI — development cluster
+# Mounted at /etc/kafkaui/dynamic_config.yaml
+
+auth:
+  type: DISABLED
+
+kafka:
+  clusters:
+    - name: farmkart-dev
+      bootstrapServers: kafka:29092
+      properties:
+        security.protocol: PLAINTEXT
+      metrics:
+        type: JMX
+        port: 9999
+
+management:
+  health:
+    ldap:
+      enabled: false
+
+logging:
+  level:
+    root: INFO
+    com.provectus: INFO

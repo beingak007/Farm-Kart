@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.farmkart</groupId>
+        <artifactId>farm-kart-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>notification</artifactId>
+    <packaging>pom</packaging>
+    <name>notification</name>
+    <modules>
+        <module>notification-client</module>
+        <module>notification-repository</module>
+        <module>notification-services</module>
+        <module>notification-rest</module>
+    </modules>
+</project>
