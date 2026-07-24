@@ -79,7 +79,7 @@ jobs:
           SPRING_PROFILES_ACTIVE: test
 
       - name: Upload JaCoCo XML reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: jacoco-reports
@@ -87,7 +87,7 @@ jobs:
           retention-days: 14
 
       - name: Upload JaCoCo HTML reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: jacoco-html-reports
@@ -95,7 +95,7 @@ jobs:
           retention-days: 7
 
       - name: Upload test results (Surefire)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: surefire-reports
@@ -205,7 +205,7 @@ jobs:
             -DskipTests
 
       - name: Upload SpotBugs reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: spotbugs-reports
@@ -213,7 +213,7 @@ jobs:
           retention-days: 14
 
       - name: Upload PMD reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: pmd-reports
@@ -260,7 +260,7 @@ jobs:
         continue-on-error: true   # Don't block merge; report findings
 
       - name: Upload OWASP report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: owasp-dependency-check-report
@@ -307,7 +307,7 @@ jobs:
             -Drevision=${{ github.sha }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: farm-kart-artifacts-${{ github.sha }}
           path: |
