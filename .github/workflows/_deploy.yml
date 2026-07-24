@@ -61,7 +61,7 @@ jobs:
 
       - name: Deploy ${{ inputs.image-tag }} to ${{ inputs.environment }}
         id: deploy
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
@@ -111,7 +111,7 @@ jobs:
       # ── Automatic rollback when verification fails ────────
       - name: Rollback to previous version
         if: failure() && steps.deploy.outcome == 'success'
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
