@@ -31,7 +31,7 @@ jobs:
     if: always() && needs.owasp.result == 'failure'
     steps:
       - name: Create GitHub issue
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.issues.create({
