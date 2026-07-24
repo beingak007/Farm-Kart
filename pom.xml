@@ -51,7 +51,7 @@
         <sonar.version>4.0.0.4121</sonar.version>
         <checkstyle.version>3.4.0</checkstyle.version>
         <spotbugs.version>4.8.6.4</spotbugs.version>
-        <pmd.version>3.24.0</pmd.version>
+        <pmd.version>3.28.0</pmd.version>
         <owasp.dependency.check.version>10.0.4</owasp.dependency.check.version>
 
         <!-- ── SonarQube Configuration ── -->
