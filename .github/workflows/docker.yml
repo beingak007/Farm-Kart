@@ -90,7 +90,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build ${{ inputs.push && 'and push ' || '' }}image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           # All Java code lives under microservice_boot/ — that's the
           # Maven reactor root, so it is the Docker build context too.
