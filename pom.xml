@@ -50,7 +50,7 @@
         <jacoco.version>0.8.12</jacoco.version>
         <sonar.version>4.0.0.4121</sonar.version>
         <checkstyle.version>3.4.0</checkstyle.version>
-        <spotbugs.version>4.8.6.4</spotbugs.version>
+        <spotbugs.version>4.10.3.0</spotbugs.version>
         <pmd.version>3.28.0</pmd.version>
         <owasp.dependency.check.version>10.0.4</owasp.dependency.check.version>
 
