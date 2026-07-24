@@ -4,7 +4,7 @@ WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests -pl api-gateway/api-gateway-rest -am
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /home
 COPY --from=build /app/api-gateway/api-gateway-rest/target/api-gateway-rest-*.jar app.jar
 COPY marketplace/docker-entrypoint.sh docker-entrypoint.sh
