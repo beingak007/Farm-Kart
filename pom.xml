@@ -52,7 +52,7 @@
         <checkstyle.version>3.4.0</checkstyle.version>
         <spotbugs.version>4.8.6.4</spotbugs.version>
         <pmd.version>3.28.0</pmd.version>
-        <owasp.dependency.check.version>10.0.4</owasp.dependency.check.version>
+        <owasp.dependency.check.version>12.2.2</owasp.dependency.check.version>
 
         <!-- ── SonarQube Configuration ── -->
         <!-- Override via GitHub Secrets: SONAR_TOKEN, SONAR_HOST_URL -->
