@@ -51,7 +51,7 @@ jobs:
       # The NVD database download (~500 MB) is the slow part.
       # Caching it cuts scan time from ~30 min to ~5 min.
       - name: Cache OWASP NVD database
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.m2/repository/org/owasp/dependency-check-data
           key: owasp-nvd-${{ runner.os }}-${{ github.run_number }}
