@@ -153,7 +153,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Download JaCoCo reports from previous job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: jacoco-reports
 
