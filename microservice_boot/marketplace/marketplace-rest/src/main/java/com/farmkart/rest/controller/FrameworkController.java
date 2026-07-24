@@ -15,7 +15,7 @@ import java.util.List;
  * Framework metadata API — lets the frontend dynamically render grid views
  * and upload-mapping screens without any hard-coded column lists.
  *
- * Analogous to the FrameworkController pattern in the Yagna view-framework.
+ * Analogous to the FrameworkController pattern in the Farm Kart view-framework.
  */
 @RestController
 @RequestMapping("/api/v1/framework")

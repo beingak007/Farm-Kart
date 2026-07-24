@@ -3,7 +3,7 @@ package com.farmkart.framework.client.dto;
 import java.util.List;
 
 /**
- * Metadata for a framework model (analogous to {@code YagnaModelDTO}).
+ * Metadata for a framework model (analogous to {@code FarmKartModelDTO}).
  * Used by the frontend to understand the shape of a data entity and
  * map upload columns, form fields, etc.
  */

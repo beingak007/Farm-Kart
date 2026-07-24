@@ -1,6 +1,6 @@
 # Farm Kart Database Migrations
 
-Migration conventions follow the Yagna `microservices_boot` pattern, adapted for Farm Kart:
+Migration conventions follow the Farm Kart `microservices_boot` pattern:
 **Elasticsearch** for search (not Solr), **Flyway** for MySQL/PostgreSQL, **CQL scripts** for Cassandra.
 
 ## Naming conventions
@@ -94,7 +94,7 @@ Index mappings live in `microservice_boot/elasticsearch-manager`. The product ca
 
 ## Reference
 
-Based on: `/home/akashs/Documents/YagnaCodeBase/yagna/microservices_boot`
+Based on: Farm Kart `microservices_boot`
 - `db_migration_Mysql` → Farm Kart per-service Flyway
 - `db_migration_Cassandra` → `{service}-rest/cassandra/migration`
 - `complex-migration-tracker` → `complex-migration-tracker`

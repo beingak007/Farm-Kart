@@ -1,7 +1,7 @@
 # Elasticsearch Index Migration Manager
 
 Farm Kart uses **Elasticsearch 8.x** for product/crop full-text search.
-This replaces the Yagna Cassandra-Solr approach — **do not use Solr**.
+This replaces the previous Cassandra-Solr approach — **do not use Solr**.
 
 ## Layout
 

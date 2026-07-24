@@ -38,7 +38,7 @@
         <module>ai-advisory</module>
         <!-- AI Agent + MCP -->
         <module>agent</module>
-        <!-- Platform: service discovery + API gateway (Yagna-style) -->
+        <!-- Platform: service discovery + API gateway (Farm Kart-style) -->
         <module>discovery-service</module>
         <module>api-gateway</module>
     </modules>

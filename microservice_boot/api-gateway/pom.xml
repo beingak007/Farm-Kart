@@ -11,7 +11,7 @@
     <artifactId>api-gateway</artifactId>
     <packaging>pom</packaging>
     <name>api-gateway</name>
-    <description>Spring Cloud Gateway — single entry point (Yagna-style api-gateway)</description>
+    <description>Spring Cloud Gateway — single entry point (Farm Kart-style api-gateway)</description>
     <modules>
         <module>api-gateway-rest</module>
     </modules>

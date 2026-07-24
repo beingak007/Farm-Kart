@@ -1,4 +1,4 @@
-# API Gateway — Spring Cloud Gateway (Yagna-style)
+# API Gateway — Spring Cloud Gateway (Farm Kart-style)
 #
 # Port: 8079
 # Single entry for:

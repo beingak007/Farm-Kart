@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
- * Spring Cloud Gateway entry point — mirrors Yagna {@code api-gateway}.
+ * Spring Cloud Gateway entry point — mirrors Farm Kart {@code api-gateway}.
  * Routes resolve via Eureka ({@code lb://&lt;spring.application.name&gt;}).
  */
 @SpringBootApplication

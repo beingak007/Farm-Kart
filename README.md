@@ -197,7 +197,7 @@ FARM_CART_MICROSERVICE/
 > Java build commands ab `microservice_boot/` ke andar chalte hain:
 > `cd microservice_boot && mvn clean package`
 
-Each domain follows the Yagna-style **4-layer** layout (no `farm-kart-` prefix on folders):
+Each domain follows the Farm Kart-style **4-layer** layout (no `farm-kart-` prefix on folders):
 ```
 {service}/                         e.g. admin/, farmer/, marketplace/
 ├── {service}-client/              DTOs, enums, request/response contracts
@@ -216,7 +216,7 @@ Only `marketplace`, `notification`, `agent`, `discovery-service` and `api-gatewa
 
 | Deployable | Port | Role |
 |---|---|---|
-| **discovery-service** | 8084 | Netflix Eureka registry (Yagna-style) |
+| **discovery-service** | 8084 | Netflix Eureka registry (Farm Kart-style) |
 | **api-gateway** | 8079 | Spring Cloud Gateway — single entry (`/farm-kart/**`, `/notification-service/**`, `/agent-service/**`) via `lb://` |
 | **Farm Kart App** (`marketplace`) | 8080 | Marketplace + merged domains (MySQL `farmkart` + Postgres) |
 | **Notification** | 8087 | SMS/Email/Push consumers |
@@ -296,7 +296,7 @@ All cache names centralised in `FkCacheNames.java`:
 
 ## Database Migrations
 
-Conventions follow Yagna `microservices_boot` (epoch + JIRA naming). See **[MIGRATION.md](MIGRATION.md)** for full rules.
+Conventions follow Farm Kart `microservices_boot` (epoch + JIRA naming). See **[MIGRATION.md](MIGRATION.md)** for full rules.
 
 ### Naming
 

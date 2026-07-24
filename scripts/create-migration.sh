@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Create a new migration file using epoch + JIRA id naming (Yagna-style).
+# Create a new migration file using epoch + JIRA id naming (Farm Kart-style).
 #
 # Usage:
 #   ./scripts/create-migration.sh mysql  farmer      FARM-123 "add_kyc_column"
@@ -25,7 +25,7 @@ case "$DB_TYPE" in
     elif [[ "$SERVICE" == "marketplace" ]]; then
       DIR="$ROOT/marketplace/marketplace-repository/src/main/resources/db/migration/marketplace"
     else
-      # Yagna-style: microservice_boot/{service}/{service}-repository/...
+      # Farm Kart-style: microservice_boot/{service}/{service}-repository/...
       DIR="$ROOT/${SERVICE}/${SERVICE}-repository/src/main/resources/db/migration/${SERVICE//-/_}"
       if [[ ! -d "$DIR" ]]; then
         DIR="$ROOT/${SERVICE}/${SERVICE}-repository/src/main/resources/db/migration/${SERVICE}"

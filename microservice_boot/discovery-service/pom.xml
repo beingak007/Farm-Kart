@@ -11,7 +11,7 @@
     <artifactId>discovery-service</artifactId>
     <packaging>pom</packaging>
     <name>discovery-service</name>
-    <description>Netflix Eureka service registry (Yagna-style discovery-service)</description>
+    <description>Netflix Eureka service registry (Farm Kart-style discovery-service)</description>
     <modules>
         <module>discovery-service-rest</module>
     </modules>

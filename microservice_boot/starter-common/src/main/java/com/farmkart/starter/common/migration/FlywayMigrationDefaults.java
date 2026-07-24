@@ -5,7 +5,7 @@ import org.flywaydb.core.Flyway;
 import javax.sql.DataSource;
 
 /**
- * Shared Flyway settings aligned with Yagna microservices_boot conventions:
+ * Shared Flyway settings aligned with Farm Kart microservices_boot conventions:
  * epoch-based versions, baseline-on-migrate, out-of-order merges.
  */
 public final class FlywayMigrationDefaults {

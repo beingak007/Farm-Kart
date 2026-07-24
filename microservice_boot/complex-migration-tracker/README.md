@@ -2,7 +2,7 @@
 
 Orchestrates multi-step migrations across **MySQL**, **PostgreSQL**, **Cassandra**, and **Elasticsearch**.
 
-Modelled on Yagna `complex-migration-tracker`; Farm Kart uses **Elasticsearch** instead of Solr.
+Modelled on Farm Kart `complex-migration-tracker`; uses **Elasticsearch** instead of Solr.
 
 ## Folder structure
 

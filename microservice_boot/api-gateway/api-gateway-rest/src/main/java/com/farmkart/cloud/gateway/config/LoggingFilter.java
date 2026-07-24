@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * Logs every inbound request and the resolved downstream route
- * (same role as Yagna {@code LoggingFilter}).
+ * (same role as Farm Kart {@code LoggingFilter}).
  */
 @Component
 public class LoggingFilter implements GlobalFilter, Ordered {

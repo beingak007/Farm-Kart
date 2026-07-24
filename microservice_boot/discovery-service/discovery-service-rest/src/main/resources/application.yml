@@ -3,7 +3,7 @@ spring:
     name: discovery-service
 
 server:
-  # Same port as Yagna discovery-service
+  # Same port as Farm Kart discovery-service
   port: ${DISCOVERY_PORT:8084}
 
 eureka:

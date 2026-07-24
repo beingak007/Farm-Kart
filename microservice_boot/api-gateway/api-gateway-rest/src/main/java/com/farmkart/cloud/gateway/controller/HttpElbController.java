@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 /**
- * Lightweight ELB / load-balancer probe (Yagna {@code HttpElbController} pattern).
+ * Lightweight ELB / load-balancer probe (Farm Kart {@code HttpElbController} pattern).
  */
 @RestController
 public class HttpElbController {

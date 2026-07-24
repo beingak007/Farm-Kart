@@ -19,7 +19,7 @@ cassandra:
     strategy: IGNORE_DUPLICATES
 ```
 
-## Best practices (from Yagna)
+## Best practices (from Farm Kart)
 
 1. One ALTER UDT per file
 2. Do not mix CREATE and DROP in one file
