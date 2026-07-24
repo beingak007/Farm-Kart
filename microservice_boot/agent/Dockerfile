@@ -4,7 +4,7 @@ WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests -pl agent/agent-rest -am
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /home
 COPY --from=build /app/agent/agent-rest/target/agent-rest-*.jar app.jar
 COPY marketplace/docker-entrypoint.sh docker-entrypoint.sh
