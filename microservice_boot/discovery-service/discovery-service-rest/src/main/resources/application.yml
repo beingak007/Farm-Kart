@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: discovery-service
+
+server:
+  # Same port as Farm Kart discovery-service
+  port: ${DISCOVERY_PORT:8084}
+
+eureka:
+  instance:
+    hostname: ${EUREKA_HOSTNAME:localhost}
+  client:
+    # Standalone registry — do not register itself or fetch a peer registry
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8084/eureka}
+  server:
+    # Faster eviction in local/dev so dead instances leave the board quickly
+    enable-self-preservation: ${EUREKA_SELF_PRESERVATION:false}
+    eviction-interval-timer-in-ms: 5000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    com.netflix.eureka: WARN
+    com.netflix.discovery: WARN

@@ -1,0 +1,52 @@
+# Farm Kart — production Kafka UI (connects to external secured cluster)
+#
+# Deploy Kafka UI only — brokers run on AWS MSK / Confluent / self-managed cluster.
+# NEVER expose port 8099 publicly; put behind VPN, SSO, or internal ingress.
+#
+# Usage:
+#   cp .env.example .env   # fill SASL + UI credentials
+#   docker compose -f docker-compose.prod.yml --env-file .env up -d
+
+name: farmkart-kafka-prod
+
+services:
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    container_name: farmkart-kafka-ui-prod
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${KAFKA_UI_PORT:-8099}:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: "true"
+      AUTH_TYPE: LOGIN_FORM
+      SPRING_SECURITY_USER_NAME: ${KAFKA_UI_USERNAME}
+      SPRING_SECURITY_USER_PASSWORD: ${KAFKA_UI_PASSWORD}
+      KAFKA_CLUSTERS_0_NAME: ${KAFKA_CLUSTER_NAME:-farmkart-prod}
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: ${KAFKA_SECURITY_PROTOCOL:-SASL_SSL}
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: ${KAFKA_SASL_MECHANISM:-SCRAM-SHA-512}
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: >-
+        org.apache.kafka.common.security.scram.ScramLoginModule required
+        username="${KAFKA_SASL_USERNAME}" password="${KAFKA_SASL_PASSWORD}";
+      KAFKA_CLUSTERS_0_READONLY: ${KAFKA_UI_READONLY:-true}
+    volumes:
+      - ./config/kafka-ui-prod.yaml:/etc/kafkaui/dynamic_config.yaml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

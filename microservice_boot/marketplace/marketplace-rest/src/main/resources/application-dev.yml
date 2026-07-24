@@ -1,0 +1,25 @@
+spring:
+  config:
+    import: optional:classpath:config/application-dev-common.yml
+  flyway:
+    enabled: false
+  jpa:
+    show-sql: false
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+farmkart:
+  s3:
+    bucket: ${AWS_S3_BUCKET:farmkart-dev-uploads}
+  kafka:
+    consumer-group: farmkart-backend-dev
+  sms:
+    provider: console
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

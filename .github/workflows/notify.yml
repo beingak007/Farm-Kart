@@ -1,0 +1,191 @@
+# ============================================================
+# Reusable Workflow — Failure Notifications
+#
+# Called by pipelines when something fails. Fans out to:
+#   - Email → developer (commit author) + Tech Lead
+#   - Slack  (incoming webhook)
+#   - Microsoft Teams (incoming webhook)
+#
+# Every channel is OPTIONAL — a step only runs when its secret
+# is configured, so the pipeline never fails because a webhook
+# is missing.
+#
+# Secrets used (all optional):
+#   SMTP_SERVER / SMTP_PORT / SMTP_USERNAME / SMTP_PASSWORD
+#   EMAIL_TECH_LEAD   — Tech Lead's address (always CC'd)
+#   EMAIL_DEVELOPER   — fallback dev address (commit author's
+#                       GitHub noreply address is used too)
+#   SLACK_WEBHOOK_URL — Slack incoming webhook
+#   TEAMS_WEBHOOK_URL — Teams incoming webhook
+# ============================================================
+name: Notify
+
+on:
+  workflow_call:
+    inputs:
+      status:
+        description: "failure | success"
+        type: string
+        required: true
+      failed-jobs:
+        description: "Comma-separated list of failed jobs"
+        type: string
+        required: false
+        default: "unknown"
+      pr-number:
+        description: "Pull request number (empty for branch builds)"
+        type: string
+        required: false
+        default: ""
+    secrets:
+      SMTP_SERVER:
+        required: false
+      SMTP_PORT:
+        required: false
+      SMTP_USERNAME:
+        required: false
+      SMTP_PASSWORD:
+        required: false
+      EMAIL_TECH_LEAD:
+        required: false
+      EMAIL_DEVELOPER:
+        required: false
+      SLACK_WEBHOOK_URL:
+        required: false
+      TEAMS_WEBHOOK_URL:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Send notifications
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: inputs.status == 'failure'
+
+    steps:
+      # One place that assembles all failure metadata; every
+      # channel below reuses these values.
+      - name: Build failure context
+        id: ctx
+        run: |
+          {
+            echo "run_url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo "short_sha=$(echo '${{ github.sha }}' | cut -c1-12)"
+          } >> "$GITHUB_OUTPUT"
+
+      # ── Email (developer + tech lead) ─────────────────────
+      - name: Check SMTP configuration
+        id: smtp
+        run: |
+          if [ -n "${{ secrets.SMTP_SERVER }}" ] && [ -n "${{ secrets.SMTP_USERNAME }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::SMTP secrets not configured — email notification skipped"
+          fi
+
+      - name: Send failure email
+        if: steps.smtp.outputs.enabled == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT || 587 }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "❌ [${{ github.repository }}] Pipeline failed on ${{ github.ref_name }} (${{ steps.ctx.outputs.short_sha }})"
+          from: Farm Kart CI <${{ secrets.SMTP_USERNAME }}>
+          to: ${{ secrets.EMAIL_DEVELOPER }},${{ secrets.EMAIL_TECH_LEAD }}
+          convert_markdown: true
+          html_body: |
+            <h2>❌ CI/CD Pipeline Failed</h2>
+            <table border="1" cellpadding="6" cellspacing="0">
+              <tr><td><b>Repository</b></td><td>${{ github.repository }}</td></tr>
+              <tr><td><b>Branch</b></td><td>${{ github.ref_name }}</td></tr>
+              <tr><td><b>Commit ID</b></td><td>${{ github.sha }}</td></tr>
+              <tr><td><b>PR Number</b></td><td>${{ inputs.pr-number || 'N/A (branch build)' }}</td></tr>
+              <tr><td><b>Failed Job(s)</b></td><td>${{ inputs.failed-jobs }}</td></tr>
+              <tr><td><b>Triggered by</b></td><td>${{ github.actor }}</td></tr>
+              <tr><td><b>Workflow</b></td><td>${{ github.workflow }}</td></tr>
+            </table>
+            <p><b>Failure Reason:</b> see the failed step logs —
+            <a href="${{ steps.ctx.outputs.run_url }}">Open GitHub Actions logs</a></p>
+            <p>Please fix the issues and push again.</p>
+
+      # ── Slack ─────────────────────────────────────────────
+      - name: Check Slack configuration
+        id: slack
+        run: |
+          if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::SLACK_WEBHOOK_URL not configured — Slack notification skipped"
+          fi
+
+      - name: Send Slack notification
+        if: steps.slack.outputs.enabled == 'true'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -sf -X POST -H 'Content-Type: application/json' "$SLACK_WEBHOOK_URL" -d @- <<EOF
+          {
+            "blocks": [
+              { "type": "header",
+                "text": { "type": "plain_text", "text": "❌ Pipeline failed — ${{ github.repository }}" } },
+              { "type": "section", "fields": [
+                  { "type": "mrkdwn", "text": "*Branch:*\n${{ github.ref_name }}" },
+                  { "type": "mrkdwn", "text": "*Commit:*\n${{ steps.ctx.outputs.short_sha }}" },
+                  { "type": "mrkdwn", "text": "*PR:*\n${{ inputs.pr-number || 'N/A' }}" },
+                  { "type": "mrkdwn", "text": "*Failed job(s):*\n${{ inputs.failed-jobs }}" },
+                  { "type": "mrkdwn", "text": "*Author:*\n${{ github.actor }}" }
+              ]},
+              { "type": "section",
+                "text": { "type": "mrkdwn", "text": "<${{ steps.ctx.outputs.run_url }}|Open GitHub Actions logs>" } }
+            ]
+          }
+          EOF
+
+      # ── Microsoft Teams ───────────────────────────────────
+      - name: Check Teams configuration
+        id: teams
+        run: |
+          if [ -n "${{ secrets.TEAMS_WEBHOOK_URL }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::TEAMS_WEBHOOK_URL not configured — Teams notification skipped"
+          fi
+
+      - name: Send Teams notification
+        if: steps.teams.outputs.enabled == 'true'
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        run: |
+          curl -sf -X POST -H 'Content-Type: application/json' "$TEAMS_WEBHOOK_URL" -d @- <<EOF
+          {
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            "themeColor": "d13438",
+            "summary": "Pipeline failed — ${{ github.repository }}",
+            "sections": [{
+              "activityTitle": "❌ CI/CD Pipeline Failed",
+              "facts": [
+                { "name": "Repository", "value": "${{ github.repository }}" },
+                { "name": "Branch",     "value": "${{ github.ref_name }}" },
+                { "name": "Commit",     "value": "${{ steps.ctx.outputs.short_sha }}" },
+                { "name": "PR Number",  "value": "${{ inputs.pr-number || 'N/A' }}" },
+                { "name": "Failed job(s)", "value": "${{ inputs.failed-jobs }}" },
+                { "name": "Author",     "value": "${{ github.actor }}" }
+              ],
+              "markdown": true
+            }],
+            "potentialAction": [{
+              "@type": "OpenUri",
+              "name": "Open GitHub Actions logs",
+              "targets": [{ "os": "default", "uri": "${{ steps.ctx.outputs.run_url }}" }]
+            }]
+          }
+          EOF

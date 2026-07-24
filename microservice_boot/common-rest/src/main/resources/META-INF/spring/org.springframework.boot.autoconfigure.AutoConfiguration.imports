@@ -1,0 +1,2 @@
+com.farmkart.common.rest.configuration.FkRestSupportAutoConfiguration
+com.farmkart.common.rest.security.FkSecurityAutoConfiguration

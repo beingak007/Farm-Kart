@@ -1,0 +1,14 @@
+spring:
+  config:
+    import: optional:classpath:config/application-dev-common.yml
+  jpa:
+    show-sql: true
+  kafka:
+    consumer:
+      group-id: farmkart-agent-dev
+
+farmkart:
+  agent:
+    llm:
+      openai:
+        model: ${OPENAI_MODEL:gpt-4o-mini}

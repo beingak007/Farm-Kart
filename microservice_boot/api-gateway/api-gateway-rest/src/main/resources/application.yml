@@ -1,0 +1,117 @@
+server:
+  port: ${GATEWAY_PORT:8079}
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: false
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: false
+      discovery:
+        locator:
+          # Auto-routes /{service-id}/** → lb://service-id (handy for new services)
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # ── Marketplace (merged Farm Kart app) ─────────────────────────────
+        - id: marketplace-health
+          uri: lb://farm-kart
+          predicates:
+            - Path=/farm-kart/actuator/health,/farm-kart/actuator/health/**,/farm-kart/actuator/info
+          filters:
+            - PreserveHostHeader
+
+        - id: marketplace-docs
+          uri: lb://farm-kart
+          predicates:
+            - Path=/farm-kart/swagger-ui.html,/farm-kart/swagger-ui/**,/farm-kart/v3/api-docs,/farm-kart/v3/api-docs/**
+          filters:
+            - PreserveHostHeader
+
+        - id: marketplace
+          uri: lb://farm-kart
+          predicates:
+            - Path=/farm-kart/**
+          filters:
+            - PreserveHostHeader
+
+        # ── Notification ───────────────────────────────────────────────────
+        - id: notification-health
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification-service/actuator/health,/notification-service/actuator/health/**,/notification-service/actuator/info
+          filters:
+            - PreserveHostHeader
+
+        - id: notification-docs
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification-service/swagger-ui.html,/notification-service/swagger-ui/**,/notification-service/v3/api-docs,/notification-service/v3/api-docs/**
+          filters:
+            - PreserveHostHeader
+
+        - id: notification
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification-service/**
+          filters:
+            - PreserveHostHeader
+
+        # ── Agent ──────────────────────────────────────────────────────────
+        - id: agent-health
+          uri: lb://agent
+          predicates:
+            - Path=/agent-service/actuator/health,/agent-service/actuator/health/**,/agent-service/actuator/info
+          filters:
+            - PreserveHostHeader
+
+        - id: agent-docs
+          uri: lb://agent
+          predicates:
+            - Path=/agent-service/swagger-ui.html,/agent-service/swagger-ui/**,/agent-service/v3/api-docs,/agent-service/v3/api-docs/**
+          filters:
+            - PreserveHostHeader
+
+        - id: agent
+          uri: lb://agent
+          predicates:
+            - Path=/agent-service/**
+          filters:
+            - PreserveHostHeader
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:true}
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8084/eureka}
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+      base-path: /api-gateway/actuator
+  endpoint:
+    health:
+      probes:
+        enabled: true
+    gateway:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.farmkart.cloud.gateway: INFO

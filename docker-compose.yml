@@ -28,6 +28,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init-warehouse-app-db.sql:/docker-entrypoint-initdb.d/02-warehouse-app-db.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U farmkart -d farmkart_framework"]
       interval: 5s
@@ -59,19 +60,24 @@ services:
 
   farm-kart-app:
     build:
-      context: .
-      dockerfile: farm-kart/Dockerfile
+      context: ./microservice_boot
+      dockerfile: marketplace/Dockerfile
     container_name: farmkart-app
     ports:
       - "8080:8080"
     environment:
-      profile: dev
+      SPRING_PROFILES_ACTIVE: dev
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}
       MYSQL_DATASOURCE_URL: jdbc:mysql://mysql:3306/farmkart?useSSL=false&allowPublicKeyRetrieval=true
       MYSQL_DATASOURCE_USERNAME: farmkart
       MYSQL_DATASOURCE_PASSWORD: farmkart
       POSTGRES_DATASOURCE_URL: jdbc:postgresql://postgres:5432/farmkart_framework
       POSTGRES_DATASOURCE_USERNAME: farmkart
       POSTGRES_DATASOURCE_PASSWORD: farmkart
+      WAREHOUSE_APP_DB_URL: jdbc:postgresql://postgres:5432/farmkart_warehouse_app
+      WAREHOUSE_APP_DB_USER: farmkart
+      WAREHOUSE_APP_DB_PASS: farmkart
+      ELASTICSEARCH_HOST: http://elasticsearch:9200
       REDIS_HOST: redis
     depends_on:
       mysql:

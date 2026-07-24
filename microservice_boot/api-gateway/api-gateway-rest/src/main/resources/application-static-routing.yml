@@ -1,0 +1,32 @@
+# Local profile WITHOUT Eureka — static upstreams.
+# Activate: --spring.profiles.active=dev,static-routing
+# or: SPRING_PROFILES_ACTIVE=dev,static-routing
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        - id: marketplace
+          uri: ${MARKETPLACE_URL:http://localhost:8080}
+          predicates:
+            - Path=/farm-kart/**
+          filters:
+            - PreserveHostHeader
+        - id: notification
+          uri: ${NOTIFICATION_URL:http://localhost:8087}
+          predicates:
+            - Path=/notification-service/**
+          filters:
+            - PreserveHostHeader
+        - id: agent
+          uri: ${AGENT_URL:http://localhost:8091}
+          predicates:
+            - Path=/agent-service/**
+          filters:
+            - PreserveHostHeader
+
+eureka:
+  client:
+    enabled: false

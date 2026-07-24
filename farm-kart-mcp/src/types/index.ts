@@ -14,27 +14,49 @@ export interface ServiceConfig {
 }
 
 export function getServiceConfig(): ServiceConfig {
+  // All domain APIs (farmer, buyer, logistics, warehouse, market-price, admin,
+  // catalog, reporting, ai-advisory) are merged into the single Farm Kart app.
+  // Only notification runs as a separate service.
+  const appUrl = process.env.FARMKART_APP_URL ?? "http://localhost:8080/farm-kart";
   return {
-    marketplaceUrl:  process.env.MARKETPLACE_URL  ?? "http://localhost:8080",
-    farmerUrl:       process.env.FARMER_URL        ?? "http://localhost:8081/farmer-service",
-    buyerUrl:        process.env.BUYER_URL         ?? "http://localhost:8082/buyer-service",
-    logisticsUrl:    process.env.LOGISTICS_URL     ?? "http://localhost:8083/logistics-service",
-    warehouseUrl:    process.env.WAREHOUSE_URL     ?? "http://localhost:8084/warehouse-service",
-    marketPriceUrl:  process.env.MARKET_PRICE_URL  ?? "http://localhost:8085/market-price-service",
-    adminUrl:        process.env.ADMIN_URL         ?? "http://localhost:8086/admin-service",
-    notificationUrl: process.env.NOTIF_URL         ?? "http://localhost:8087/notification-service",
-    catalogUrl:      process.env.CATALOG_URL       ?? "http://localhost:8088/catalog-service",
-    reportingUrl:    process.env.REPORTING_URL     ?? "http://localhost:8089/reporting-service",
-    aiAdvisoryUrl:   process.env.AI_ADVISORY_URL   ?? "http://localhost:8090/ai-advisory-service",
+    marketplaceUrl:  appUrl,
+    farmerUrl:       appUrl,
+    buyerUrl:        appUrl,
+    logisticsUrl:    appUrl,
+    warehouseUrl:    appUrl,
+    marketPriceUrl:  appUrl,
+    adminUrl:        appUrl,
+    notificationUrl: process.env.NOTIF_URL ?? "http://localhost:8087/notification-service",
+    catalogUrl:      appUrl,
+    reportingUrl:    appUrl,
+    aiAdvisoryUrl:   appUrl,
   };
 }
 
 // ── Common API response wrapper ───────────────────────────────────────────────
+export interface FieldErrorDetail {
+  field: string;
+  message: string;
+  code: string;
+}
+
+export interface ApiError {
+  code: string;
+  message: string;
+  details?: FieldErrorDetail[];
+}
+
+export interface ResponseMeta {
+  requestId: string;
+  timestamp: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
-  data: T;
+  data?: T;
   message?: string;
-  timestamp?: string;
+  error?: ApiError;
+  meta?: ResponseMeta;
 }
 
 // ── Domain types ─────────────────────────────────────────────────────────────

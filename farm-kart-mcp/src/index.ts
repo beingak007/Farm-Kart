@@ -18,17 +18,8 @@
  *   node dist/index.js                # production
  *
  * Environment variables:
- *   MARKETPLACE_URL    (default: http://localhost:8080)
- *   FARMER_URL         (default: http://localhost:8081/farmer-service)
- *   BUYER_URL          (default: http://localhost:8082/buyer-service)
- *   LOGISTICS_URL      (default: http://localhost:8083/logistics-service)
- *   WAREHOUSE_URL      (default: http://localhost:8084/warehouse-service)
- *   MARKET_PRICE_URL   (default: http://localhost:8085/market-price-service)
- *   ADMIN_URL          (default: http://localhost:8086/admin-service)
+ *   FARMKART_APP_URL   (default: http://localhost:8080/farm-kart — merged Farm Kart app)
  *   NOTIF_URL          (default: http://localhost:8087/notification-service)
- *   CATALOG_URL        (default: http://localhost:8088/catalog-service)
- *   REPORTING_URL      (default: http://localhost:8089/reporting-service)
- *   AI_ADVISORY_URL    (default: http://localhost:8090/ai-advisory-service)
  *   FARMKART_JWT_TOKEN (optional JWT bearer token for secured deployments)
  */
 
@@ -64,17 +55,9 @@ server.resource(
   "farmkart://services",
   async () => {
     const services = [
-      { name: "Marketplace",      port: 8080, path: "" },
-      { name: "Farmer",           port: 8081, path: "/farmer-service" },
-      { name: "Buyer",            port: 8082, path: "/buyer-service" },
-      { name: "Logistics",        port: 8083, path: "/logistics-service" },
-      { name: "Warehouse",        port: 8084, path: "/warehouse-service" },
-      { name: "Market Price",     port: 8085, path: "/market-price-service" },
-      { name: "Admin",            port: 8086, path: "/admin-service" },
+      { name: "Farm Kart App (marketplace, farmer, buyer, logistics, warehouse, market price, admin, catalog, reporting, ai advisory)", port: 8080, path: "/farm-kart" },
       { name: "Notification",     port: 8087, path: "/notification-service" },
-      { name: "Product Catalog",  port: 8088, path: "/catalog-service" },
-      { name: "Reporting",        port: 8089, path: "/reporting-service" },
-      { name: "AI Advisory",      port: 8090, path: "/ai-advisory-service" },
+      { name: "Agent",            port: 8091, path: "/agent-service" },
     ];
     return {
       contents: [

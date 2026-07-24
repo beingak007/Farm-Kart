@@ -1,0 +1,34 @@
+# Provectus Kafka UI — production cluster
+# SASL credentials and UI password come from Kubernetes Secret / env.
+
+auth:
+  type: LOGIN_FORM
+
+spring:
+  security:
+    user:
+      name: ${KAFKA_UI_USERNAME}
+      password: ${KAFKA_UI_PASSWORD}
+
+kafka:
+  clusters:
+    - name: ${KAFKA_CLUSTER_NAME:farmkart-prod}
+      bootstrapServers: ${KAFKA_BOOTSTRAP_SERVERS}
+      readOnly: ${KAFKA_UI_READONLY:true}
+      properties:
+        security.protocol: ${KAFKA_SECURITY_PROTOCOL:SASL_SSL}
+        sasl.mechanism: ${KAFKA_SASL_MECHANISM:SCRAM-SHA-512}
+        sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="${KAFKA_SASL_USERNAME}" password="${KAFKA_SASL_PASSWORD}";
+      metrics:
+        type: JMX
+        port: 9999
+
+management:
+  health:
+    ldap:
+      enabled: false
+
+logging:
+  level:
+    root: WARN
+    com.provectus: INFO
